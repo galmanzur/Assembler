@@ -1,7 +1,8 @@
 #ifndef FIRST_PASS_H
 #define FIRST_PASS_H
 
-#include <error_service.h>
+#include <unistd.h>
+#include <string.h>
 #include "symbol_service.h"
 #include "lines_parser.h"
 

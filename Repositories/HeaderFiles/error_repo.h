@@ -1,6 +1,6 @@
  
- #ifndef ERROR_SERVICE_H
-#define ERROR_SERVICE_H
+ #ifndef ERROR_REPO_H
+#define ERROR_REPO_H
 
 #include "lines_parser.h"
 #include "symbol_service.h"
@@ -96,4 +96,4 @@ int get_num_errors(error_table *errors_list);
 
 
 
-// #endif /* ERROR_SERVICE_H */
+// #endif /* ERROR_REPO_H */

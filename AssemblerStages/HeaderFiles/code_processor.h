@@ -3,8 +3,9 @@
 
 #include "lines_parser.h"
 #include "symbol_service.h"
-
- 
+#include "error_repo.h"
+#include "file_service.h"
+#include "machine_code_repo.h" 
 
 /// @brief Convert an integer or character string to a binary string representation
 /// @param number_str A string representing an integer or character
@@ -32,11 +33,6 @@ char *get_word(memory_table *word_list, int i);
 
 char *get_first_word(symbol_table *table, command_field *command_table, char ***registers, char *command, char *first_op, char *second_op);
 
-void init_memory_table(memory_table *ob_list);
-
-void add_to_memory_table(memory_table *ob_list, memory_table *word_list);
-
-void print_memory_table(memory_table *ob_list,char *name);
 
 void add_word(memory_table *word_list,char *word,int x);
 
@@ -46,6 +42,5 @@ void first_assemble(memory_table *word_list, symbol_table *table,error_table *er
 
 void second_assemble(memory_table *data_binary, memory_table *instruction_binary, memory_table *word_list, symbol_table *table,error_table *errors_list, char **line, char **token, command_field *command_table, char **am_file, char **ob_file, char **ent_file, char **ext_file, FILE **fp,  char ***registers, char ***directives, char **line_copy);
 
-void free_memory_table(memory_table *word_list);
 
 #endif /* CODE_PROCESSOR_H */

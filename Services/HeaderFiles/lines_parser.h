@@ -15,7 +15,6 @@ Each token can be one of the following:
 *Directive (e.g., .data, .string, etc.)
 */
 
-
 #ifndef LINES_PARSER_H
 #define LINES_PARSER_H
 

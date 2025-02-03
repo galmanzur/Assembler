@@ -1,5 +1,5 @@
-#ifndef PRE_ASSEMBLER_H
-#define PRE_ASSEMBLER_H
+#ifndef MACRO_REPO_H
+#define MACRO_REPO_H
 
 /// @brief 
 typedef struct macro {
@@ -20,8 +20,6 @@ int is_macro_declaration(char *token);
 /// @return returns 1 if the token is the end of a macro declaration, 0 otherwise
 int is_macro_end(char *token);
 
-//--------------------------------------------------------------------------------------------
-
 /// @brief 
 /// @param name 
 /// @param line 
@@ -32,7 +30,7 @@ int add_macro(char *name,int line);
 /// @brief 
 /// @param macro_name 
 /// @return 
-macro *is_macro_name(char *macro_name);
+macro* is_exists(char *macro_name);
 
 /// @brief 
 /// @param new_content 
@@ -41,7 +39,7 @@ int append_macro_content(char *new_content);
 
 /// @brief 
 /// @return 
-macro *get_last_macro();
+macro* get_last_macro();
 
 /// @brief  
 void remove_last_macro();
@@ -50,4 +48,4 @@ void remove_last_macro();
 void free_macros();
 
 
-#endif
+#endif /* MACRO_REPO_H */

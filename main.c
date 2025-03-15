@@ -1,53 +1,48 @@
-#include "main_assembler.h"
-/* Main function */
-int main(int argc, char *argv[]) 
+#include "main.h"
+
+char *extension_file_source = ".as"; /*variable to store the extension of file as file*/
+char *extension_file_after_preassembler = ".am";  /*varaiable to store the extension of spread file*/
+
+
+/*main function that use all other function of assembler to create our two pass
+assembler*/
+int main(int argc, char *argv[])
 {
-    int i;
-    /* Allocate memory for variables */
-    char *line = NULL;
-    char *token = NULL;
-    char *am_file = NULL;
-    char *ob_file;
-    char *ext_file;
-    char *ent_file;
-    char *line_copy = NULL;
-    char *as_file_original = NULL;
-    char **registers = malloc(sizeof(char *) * NUM_OF_REGISTERS);
-    char **directives = malloc(sizeof(char *) * NUM_OF_DIRECTIVES);
-    symbol_table table;
-    error_table errors_list;
-    command_field command_table[NUM_COMMANDS];
-    FILE *fp;
-
-    /* Check for at least one .as code file */
-    if (argc < 2) {
-        printf("Usage: %s <filename1> <filename2> ... <filenameN>\n", argv[0]);
-        return 1;
-    }
-    /* Run the assembler on each file */
-    for (i = 1; i < argc; i++)
+    int i;                            
+    char *fname, *sname; /*stores the file name, spreaded file name*/
+    /*printing no arguments were given*/
+    if (argc == 1)
     {
-        if(check_file(argv[i])) /* checks that the file is valid .as file (existing)*/
-        {
-            /* resetts allocations between files */
-            if (line != NULL)
-                line = NULL;
-    		line = malloc(MAX_LINE_SIZE);
-            if (am_file != NULL)
-                am_file = NULL;
-    		am_file = malloc(MAX_LINE_SIZE);
-            if (as_file_original != NULL)
-                as_file_original = NULL;
-    		as_file_original = malloc(MAX_LINE_SIZE);
-    		token = NULL;
-    		line_copy = NULL;
-
-            init_filenames(argv[i], &ob_file, &ext_file, &ent_file, NULL);
-            /* calling assemble to start the assemble process */
-            assemble(argv[i], &table, &errors_list, line, token, command_table, am_file, &as_file_original, registers, directives, line_copy, ob_file, ext_file, ent_file, &fp);
-        }
+        /*printing error to user of too few arguments*/
+        printf("ERROR: Too few arguments given - no file name.\n");
     }
-    /* Ended for all files, flush and kill */
-    flush_main(registers, directives);
+
+    /*for loop to treat each file given as argument in the assembler manner*/
+    for (i = 1; i < argc; i++)
+    {    
+        int data_image[2048] = {0}; /*data image buffer of fixed size*/
+        int IC = 100; /*initializing IC to 100*/
+        int DC = 0; /*initializing DC to 0*/
+        codeimage* code_table = NULL;  
+        symbol* symbol_table = NULL;         
+        externList* extern_list = NULL; 
+        fname = add_extension(argv[i], extension_file_source); /*changing name to name of file by adding file extension*/
+        sname = add_extension(argv[i], extension_file_after_preassembler);/*changing name to name of file by adding file extension*/
+
+        /*checking if file can be opened*/
+        if(check_file(fname))
+        {
+            call_pre_assembler(fname, sname); /*preassembler stage - warns only*/
+            printf("Pre-Assembler stage completed.\n");
+        }
+
+        /*desytoying and initializing all parameters used in this run
+        free_symbol_table(symbol_table);
+        destroy_codeimage(code_table);
+        destroy_externlist(extern_list); */
+        memset(data_image, 0, sizeof(data_image));
+        free(fname);
+        free(sname);
+    }
     return 0;
 }

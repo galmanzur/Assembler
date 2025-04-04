@@ -1,5 +1,5 @@
-#ifndef FILE_SERVICE_H
-#define FILE_SERVICE_H
+#ifndef MACRO_REPO_H
+#define MACRO_REPO_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,10 +36,11 @@ void add_macro(macro_table *macros_list, char* name, char** lines, int num_lines
 /*----------------------------------------------------------------------------*/
 /*function to get macro and its relevant code lines before spreading it to the 
 .am filre for encodeing*/
-macro *get_macro(macro_table *macros_list, char *name);
+macro *get_macro_if_equals(macro_table *macros_list, char *name);
 
 /*----------------------------------------------------------------------------*/
 /*function to free and destroy the macro table after it is being used*/
 void free_macro_table(macro_table *macro_list);
 
-#endif /* FILE_SERVICE_H */
+void print_macro_table(macro_table *table);
+#endif /* MACRO_REPO */

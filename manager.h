@@ -13,11 +13,9 @@ in our tasks assembly and compouter*/
 #define NUM_REGISTERS 8
 #define NUM_INSTRUCTIONS 4
 
-typedef enum {NONE, ALLBUT0, ALLBUT2, ALLBUT02, NOTHINGBUT1} addressing_options;
-
 /*the assembly language opcodes array, the index of each opcode in the array 
 is given by the value it gets in machine language*/
-extern const char *opcodes[NUM_OPCODES];
+
 
 /*the 8 registers r0-r7 of the CPU placed in the imaginery computer for this 
 task*/
@@ -26,12 +24,16 @@ extern const char *registers[NUM_REGISTERS];
 /*array of valid instructions for data types of the assembler*/
 extern const char *instructions[NUM_INSTRUCTIONS];
 
-typedef struct opcode_param_and_addressing_table
+typedef struct
 {
-	int source, destination;
-} opcode_param_and_addressing_table;
+	char* name;
+	int opcode_num;
+	int funct;
+	int params_num;
+} opcode;
 
-extern const opcode_param_and_addressing_table opcodes_table[];
+extern const opcode opcodes[NUM_OPCODES];
+/*extern const char *opcodes[NUM_OPCODES];*/
 
 #endif /* MANAGER_H */
 

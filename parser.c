@@ -1,7 +1,5 @@
 #include "parser.h"
 
-
-
 /*----------------------------------------------------------------------------*/
 /*checking if character is in valid ascii table range from 0 to 127
 getting a char c, return true if ASCII false if not*/
@@ -13,39 +11,50 @@ bool is_ascii(int c)
 /*----------------------------------------------------------------------------*/
 /*function to check if number is a whole number gets a str of number and cline
 for error handling*/
-bool is_whole_number(char *str)
+bool is_legal_number(char *str)
 {
+	printf("[is_legal_number********]: is_legal_number called with str: %s\n", str);
     if (str == NULL)
     	return false;
     if(*str == '\0')
     	return false;
 
-    /*check for sign - optional*/
-    if (*str == '+' || *str == '-')
-        str++;
+	if(str)
+	{
+		str = str + strspn(str, " \t\n\r"); /*skip spaces*/
 
-    /*check if the remaining characters are digits*/
-    while (*str != '\0')
-    {
-        if (!isdigit(*str))
-        {
-        	return false;
-        }
-        str++;
-    }
-    return true;
+		printf("[is_legal_number********]: checking first char: %c\n", *str);	
+		/*check for sign - optional*/
+		if (*str == '+' || *str == '-')
+			str++;
+	
+		/*check if the remaining characters are digits*/
+		while (*str != '\0' && *str != ' ' && *str != '\t' && *str != '\n' && *str != '\r')
+		{
+			printf("[is_legal_number********]: checking char: %c\n", *str);
+			if (!isdigit(*str))
+			{
+				printf("[is_legal_number********]: is_legal_number returned false\n");
+				return false;
+			}
+			str++;
+		}
+		printf("[is_legal_number********]: is_legal_number returned true\n");
+		return true;
+	}
+	
 }
 
 /*----------------------------------------------------------------------------*/
 /*checking if word is opcodes return index in list if it is else return -1*/
-int is_opcode(char *word)
+int get_opcode(char *word)
 {
 	int i;
 	if(!word)
 		return -1; 
     /*comparing if name is one conatianed in saved opcodes */
     for (i = 0; i < NUM_OPCODES; i++)
-        if (strcmp(word, opcodes[i]) == 0) 
+        if (strcmp(word, opcodes[i].name) == 0) 
             return i;
     return -1;
 }
@@ -66,12 +75,12 @@ int is_data(char *word)
 /*chekcing if word is opcode or instruction*/
 bool is_command(char *word)
 {
-	return (is_opcode(word) != -1) || (is_data(word)  != -1);
+	return (get_opcode(word) != -1) || (is_data(word)  != -1);
 }
 
 /*----------------------------------------------------------------------------*/
 /*function to check if word is computer register*/
-bool is_register(char *word)
+bool is_register_in_assembler(char *word)
 {
 	int i;
 	for (i = 0; i < NUM_REGISTERS; i++) 
@@ -85,16 +94,16 @@ bool is_register(char *word)
 else if name is saved word in assembly language return false*/
 bool is_safe_word(char *word)
 {
-	return (is_command(word) || is_register(word));
+	return (is_command(word) || is_register_in_assembler(word));
 }
 
 /*----------------------------------------------------------------------------*/
 /*function to check if line is blank or comment line*/
-bool blank_comment_line(char* line)
+bool is_blank_or_comment(char* line)
 {
 	char buffer[MAX_LINE], *word;
 	strcpy(buffer, line);
-	word = strtok(buffer, " \t\n");
+	word = strtok(buffer, " \t\n\r");
 	if(!word) 
 		return true;
 	if(word[0] == ';')
@@ -105,7 +114,7 @@ bool blank_comment_line(char* line)
 /*----------------------------------------------------------------------------*/
 /*checking if label is ended in : if it is return true else use cline for indicative 
 error*/
-bool check_label_colon(char *label)
+bool is_label_end_with_colon(char *label)
 {
     if (label) 
     {
@@ -116,49 +125,10 @@ bool check_label_colon(char *label)
     return false;
 }
 
-/*----------------------------------------------------------------------------*/
-/*checking if str is of immediate addressing type */
-bool immediate_addressing_check(char *str)
-{
-	return (str[0] == '#');
-}
-
-/*----------------------------------------------------------------------------*/
-/*check if str is of type param_jump addressing*/
-bool param_jump_check(char *str)
-{
-	str = strstr(str, "(");
-	if(!str)
-		return false;
-	return true;
-}
-
-/*----------------------------------------------------------------------------*/
-/*check if str is of type direct_register addressing return true or false depends*/
-bool direct_register_check(char *str)
-{
-	return ((str[0] == 'r') && (strlen(str) == 2) && (isdigit(str[1])));
-}
-
-/*----------------------------------------------------------------------------*/
-/*we assume the parameter we get is with no spacesget addressing type of str
-using above functions*/
-addressing check_addressing_type(char *str)
-{
-	if(!str)
-		return -1;
-	if(immediate_addressing_check(str))
-		return immediate;
-	if (direct_register_check(str))
-		return direct_register;
-	if (param_jump_check(str))
-		return param_jump;
-	return direct;
-}
 
 /*----------------------------------------------------------------------------*/
 /*assuming opcode correct get line and check if starts with comma*/
-bool start_with_coma(char *line, int cline)
+bool is_start_with_coma(char *line, int cline)
 {
 	while(isspace(*line++));
 
@@ -172,7 +142,7 @@ bool start_with_coma(char *line, int cline)
 
 /*----------------------------------------------------------------------------*/
 /*assuming opcode correct get line and check if ends with comma*/
-bool end_with_coma(char *line, int cline)
+bool is_end_with_coma(char *line, int cline)
 {
 	int i = strlen(line) - 1; 
 	while (isspace(line[i]))
@@ -187,7 +157,7 @@ bool end_with_coma(char *line, int cline)
 
 /*----------------------------------------------------------------------------*/
 /*function to count number of commas in line*/
-int mutiple_comma(char* line)
+int how_much_commas(char* line)
 {
 	int i, counter_comma = 0;
 	if(line == NULL)
@@ -197,3 +167,85 @@ int mutiple_comma(char* line)
 			counter_comma++;
 	return counter_comma;
 }
+
+/*checking if word to represent label is safe if it is return true else false + indecative error
+message to user*/
+bool is_safe_label(char *word, int cline)
+{
+	int i;
+    int length = strlen(word);
+    if (length > 0)
+    {
+    	if(length <= MAX_LABEL && word)
+    	{
+			word = strtok(word, " \t\r\n");
+       		if (isalpha(word[0])) /*checking first character in label name is alphabetical*/
+       		{
+       		   /*  for (i = 1; i < length; i++) /*checking if all characters are alpahnumerical
+       		    {
+       		        if (!isalnum(word[i]))
+       		        {
+       		            printf("ERROR: Invalid character in label '%s' at line %d\n", word, cline);
+       		            return false;
+       		        }
+       		    } */
+       		    if (!is_safe_word(word))
+       		        return true;
+       		    else
+       		    {
+       		        printf("ERROR: Reserved word '%s' used as a label at line %d\n", word, cline);
+       		        return false;
+       		    }
+       		}
+       		else
+       		{
+       		    printf("ERROR: Label '%s' at line %d does not start with an alphabetical character\n", word, cline);
+       		    return false;
+       		}
+   		}
+		else
+		{
+		    printf("ERROR: Label '%s' at line %d is longer than %d characters\n", word, cline, MAX_LABEL);
+		    return false;
+		}
+	}
+	return true;
+}
+/*----------------------------------------------------------------------------*/
+/* this function checks if a line of assembly code is valid
+ based on the format: opcode param1 , param 2
+ there can be any number of spaces between opcode, params, and comma.*/
+ bool valid_line_comma_spaces(char* line, int cline)
+ {
+	 char* ptr = line;
+	 bool comma_flag = false;
+ 
+	 while (*ptr != '\0') 
+	 {
+		 if (*ptr == ',') 
+		 {
+			 if (comma_flag == false)
+			 {
+				 printf("ERROR: invalid comma or spaces in line %d.\n", cline);
+				 return false;
+			 }
+			 comma_flag = false;
+		 } 
+		 else if (isspace(*ptr)) 
+		 {
+			 /* Ignore multiple spaces */
+			 while (isspace(*ptr))
+				 ptr++;
+			 /* If there's no comma after multiple spaces, set flag to false */
+			 if (*ptr != ',' && *ptr != '\0')
+				 comma_flag = false;
+		 } 
+		 else 
+		 {
+			 comma_flag = true;
+		 }
+		 ptr++;
+	 }
+	 return true;
+ }
+

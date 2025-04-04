@@ -1,6 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include "file_service.h"
 #include "manager.h"
 #include "assembler_data.h"
 #include "enable_bool.h"

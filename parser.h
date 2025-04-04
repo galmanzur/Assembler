@@ -1,5 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
+#include "symbol_repo.h"
 #include "manager.h"
 #include "assembler_data.h"
 #include "enable_bool.h"
@@ -12,11 +13,11 @@ bool is_ascii(int c);
 /*----------------------------------------------------------------------------*/
 /*function to check if number is a whole number gets a str of number and cline
 for error handling*/
-bool is_whole_number(char *str);
+bool is_legal_number(char *str);
 
 /*----------------------------------------------------------------------------*/
 /*checking if word is opcodes return index in list if it is else return -1*/
-int is_opcode(char *word);
+int get_opcode(char *word);
 
 /*----------------------------------------------------------------------------*/
 /*checking if word is insruction return index in list if it is else return -1*/
@@ -33,44 +34,38 @@ bool is_safe_word(char *word);
 
 /*----------------------------------------------------------------------------*/
 /*function to check if line is blank or comment line*/
-bool blank_comment_line(char* line);
+bool is_blank_or_comment(char* line);
 
 /*----------------------------------------------------------------------------*/
 /*checking if label is ended in : if it is return true else use cline for indicative 
 error*/
-bool check_label_colon(char *label);
-
-/*----------------------------------------------------------------------------*/
-/*checking if str is of immediate addressing type */
-bool immediate_addressing_check(char *str);
-
-/*----------------------------------------------------------------------------*/
-/*check if str is of type param_jump addressing*/
-bool param_jump_check(char *str);
-
-/*----------------------------------------------------------------------------*/
-/*check if str is of type direct_register addressing return true or false depends*/
-bool direct_register_check(char *str);
-
-/*----------------------------------------------------------------------------*/
-/*we assume the parameter we get is with no spaces
-get addressing type of str using above functions*/
-addressing check_addressing_type(char *str);
+bool is_label_end_with_colon(char *label);
 
 /*----------------------------------------------------------------------------*/
 /*assuming opcode correct get line and check if starts with comma*/
-bool start_with_coma(char *line, int cline);
+bool is_start_with_coma(char *line, int cline);
 
 /*----------------------------------------------------------------------------*/
 /*assuming opcode correct get line and check if ends with comma*/
-bool end_with_coma(char *line, int cline);
+bool is_end_with_coma(char *line, int cline);
 
 /*----------------------------------------------------------------------------*/
 /*function to count number of commas in line*/
-int mutiple_comma(char* line);
+int how_much_commas(char* line);
 
 /*----------------------------------------------------------------------------*/
 /*function to check if word is register*/
-bool is_register(char *word);
+bool is_register_in_assembler(char *word);
+
+/*----------------------------------------------------------------------------*/
+/*checking if label is safe if it is return true else false + indicative error
+message to user*/
+bool is_safe_label(char *word, int cline);
+
+/*----------------------------------------------------------------------------*/
+/* this function checks if a line of assembly code is valid
+ based on the format: opcode param1 , param 2
+ there can be any number of spaces between opcode, params, and comma.*/
+bool valid_line_comma_spaces(char* line, int cline);
 
 #endif /* PARSER_H */

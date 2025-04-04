@@ -1,7 +1,10 @@
 all: assembler
 
-assembler: file_service.o first_pass.o macro_repo.o main.o manager.o parser.o pre_assembler.o second_pass.o symbol_repo.o
-	gcc -ansi -Wall -pedantic -o assembler file_service.o first_pass.o macro_repo.o main.o manager.o parser.o pre_assembler.o second_pass.o symbol_repo.o
+assembler: file_service.o first_pass.o macro_repo.o main.o manager.o parser.o pre_assembler.o second_pass.o symbol_repo.o addressing_service.o process_data.o technical_functions.o debug.o
+	gcc -ansi -Wall -pedantic -o assembler file_service.o first_pass.o macro_repo.o main.o manager.o parser.o pre_assembler.o second_pass.o symbol_repo.o addressing_service.o process_data.o technical_functions.o debug.o
+
+symbol_repo.o: symbol_repo.c symbol_repo.h
+	gcc -ansi -Wall -pedantic -c symbol_repo.c
 
 file_service.o: file_service.c file_service.h
 	gcc -ansi -Wall -pedantic -c file_service.c
@@ -27,8 +30,18 @@ pre_assembler.o: pre_assembler.c pre_assembler.h
 second_pass.o: second_pass.c second_pass.h
 	gcc -ansi -Wall -pedantic -c second_pass.c
 
-symbol_repo.o: symbol_repo.c symbol_repo.h
-	gcc -ansi -Wall -pedantic -c symbol_repo.c
+debug.o: debug.c debug.h
+	gcc -ansi -Wall -pedantic -c debug.c
+
+addressing_service.o: addressing_service.c addressing_service.h
+	gcc -ansi -Wall -pedantic -c addressing_service.c	
+
+process_data.o: process_data.c process_data.h
+	gcc -ansi -Wall -pedantic -c process_data.c
+
+technical_functions.o: technical_functions.c technical_functions.h
+	gcc -ansi -Wall -pedantic -c technical_functions.c	
+
 
 clean:
 	rm -f *.o assembler

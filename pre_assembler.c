@@ -1,6 +1,6 @@
 #include "pre_assembler.h"
 /*----------------------------------------------------------------------------*/
-/*function calling a macro from table and spreading it*/
+
 void call_pre_assembler(char *input_file, char *output_file) 
 {
     int i, j;
@@ -9,7 +9,7 @@ void call_pre_assembler(char *input_file, char *output_file)
     FILE *dst_file;
     macro_table macros_list;
     char line[MAX_LINE];
-    bool is_macro_found = false; /* is macro flag */
+    bool isMcr = false; /* is macro flag */
     int num_lines = 0;
     char **macro_lines = NULL;
     char *word;
@@ -26,19 +26,24 @@ void call_pre_assembler(char *input_file, char *output_file)
     {
         cline++;
         strcpy(line_copy, line);
-        word = strtok(line_copy, " \t\n");
-
+        word = strtok(line_copy, " \t\r\n"); /* get first word */
+      
         if (!word) {
             fprintf(dst_file, "%s", line); /* Keep the line in the output file */
             continue;
         }
+
+        word[strcspn(word, "\r\n")] = '\0';
+
         /*if is not macro read file, put lines and check for macros*/
-        if (!is_macro_found) 
+        if (!isMcr) 
         {
             if (strcmp(word, "mcr") == 0) 
             {
-                is_macro_found = true;
+
+                isMcr = true;
                 word = strtok(NULL, " \t\n");
+
 
                 /*checking if macro is safe*/
                 if (!is_safe_word(word)) 
@@ -60,7 +65,7 @@ void call_pre_assembler(char *input_file, char *output_file)
 
             else 
             {
-                curr_macro = get_macro(&macros_list, word);
+                curr_macro = get_macro_if_equals(&macros_list, word);
                 if (curr_macro != NULL) 
                 {
                     for (i = 0; i < curr_macro->num_lines; i++) 
@@ -76,7 +81,7 @@ void call_pre_assembler(char *input_file, char *output_file)
         } 
         else 
         {
-            if (strcmp(word, "endmcr") == 0) 
+            if (strcmp(word, "mcroend") == 0) 
             {
                 add_macro(&macros_list, macro_lines[0], macro_lines + 1, num_lines - 1);
                 for (j = 0; j < num_lines; j++)
@@ -84,7 +89,7 @@ void call_pre_assembler(char *input_file, char *output_file)
                 free(macro_lines);
                 macro_lines = NULL;
                 num_lines = 0;
-                is_macro_found = false;
+                isMcr = false;
             } 
 
             else 
@@ -93,6 +98,7 @@ void call_pre_assembler(char *input_file, char *output_file)
                 strcpy(macro_lines[num_lines++], line);
             }
         }
+        print_macro_table(&macros_list);
     }
 
     /*closing files*/
@@ -100,3 +106,44 @@ void call_pre_assembler(char *input_file, char *output_file)
     fclose(dst_file);
     free_macro_table(&macros_list);
 }
+
+/*
+void validate_macro_definition(FILE *src_file, macro_table *macros_list, char *word, int current_line) 
+{
+    if (!word || is_safe_word(word)) 
+    {
+        fprintf(stderr, "ERROR: \"%s\" in line %d is reserved word, cannot be macro name.\n", word, current_line);
+        return;
+    }
+}
+
+void spread_out_macro(FILE *dst_file, macro_table *macros_list, char *word, char *line) 
+{
+    macro *current_macro;
+    int i;
+    current_macro = get_macro(macros_list, word);
+    if (current_macro != NULL) 
+    {
+        for (i = 0; i < current_macro->num_lines; i++) 
+        {
+            fprintf(dst_file, "%s", current_macro->lines[i]);
+        }
+    } 
+    else 
+    {
+        fprintf(dst_file, "%s", line);
+    }
+}
+
+void save_macro(macro_table *macros_list, char **macro_lines, int num_lines) 
+{
+    int j;
+    if (!macro_lines || num_lines == 0) return;
+    
+    add_macro(macros_list, macro_lines[0], macro_lines + 1, num_lines - 1);
+    
+    for (j = 0; j < num_lines; j++)
+        free(macro_lines[j]);
+    
+    free(macro_lines);
+}*/

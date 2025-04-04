@@ -56,17 +56,29 @@ void add_macro(macro_table *macros_list, char* name, char** lines, int num_lines
 
 /*----------------------------------------------------------------------------*/
 /*function to get the macro from macro list*/
-macro *get_macro(macro_table *macros_list, char *name) 
+macro *get_macro_if_equals(macro_table *macros_list, char *name) 
 {
     int i;
-    /*ittireating through the loop to find macro*/
+
+    /* Remove trailing \r or \n from the name to ensure clean comparison */
+    if (name != NULL)
+        name[strcspn(name, "\r\n")] = '\0';
+
+    /* iterate through the macro list */
     for (i = 0; i < macros_list->num_macros; i++) 
     {
-        if (strcmp(macros_list->macros[i]->name, name) == 0) 
+        char *macro_name = macros_list->macros[i]->name;
+
+        /* also clean the stored macro name, just in case */
+        if (macro_name != NULL)
+            macro_name[strcspn(macro_name, "\r\n")] = '\0';
+
+        if (strcmp(macro_name, name) == 0) 
         {
             return macros_list->macros[i];
-        }
+        } 
     }
+
     return NULL;
 }
 
@@ -87,4 +99,48 @@ void free_macro_table(macro_table *macro_list)
     free(macro_list->macros);
     macro_list->num_macros = 0;
     macro_list->macro_capacity = 0;
+}
+
+/*
+ * This function prints all macros in the given macro_table,
+ * including their names, number of lines, and the lines themselves.
+ */
+void print_macro_table(macro_table *table)
+{
+    int i, j;
+    
+    if (table == NULL)
+    {
+        printf("Macro table pointer is NULL.\n");
+        return;
+    }
+
+    printf("=== Macro Table ===\n");
+    printf("Number of macros: %d\n", table->num_macros);
+
+    /* Loop over all macros in the table */
+    for (i = 0; i < table->num_macros; i++)
+    {
+        macro *m = table->macros[i];
+
+        if (m != NULL)
+        {
+            printf("\nMacro %d:\n", i + 1);
+            printf("  Name: %s\n", m->name);
+            printf("  Number of lines: %d\n", m->num_lines);
+            printf("  Lines:\n");
+            
+            for (j = 0; j < m->num_lines; j++)
+            {
+                printf("    %s\n", m->lines[j]);
+            }
+        }
+        else
+        {
+            /* If for some reason the macro pointer is NULL */
+            printf("\nMacro %d is NULL.\n", i + 1);
+        }
+    }
+
+    printf("\n=== End of Macro Table ===\n");
 }

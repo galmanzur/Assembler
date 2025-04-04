@@ -1,15 +1,16 @@
-#ifndef ASSEMBLER_DATA_H
-#define ASSEMBLER_DATA_H
+#ifndef ENCODING_DATA_H
+#define ENCODING_DATA_H
 
-/*----------------------------------------------------------------------------*/
-#define MAX_LINE 81 /*max line in code is 80 + line end '\0' == 81*/
-#define MAX_LABEL 30 /*defining max label size*/
+#include "assembler_config_data.h"
+#include "enable_bool.h"
+#include "addressing_service.h"
+#include "process_data.h"
+#include "symbol_repo.h"
+#include "parser.h"
+#include "file_service.h"
 
-/*----------------------------------------------------------------------------*/
-
-/*defines thew amount of useble memory for the assembly code which is 
-256 total words minus 100 used for the OS, etc...*/
-#define USABLE_MEMORY_SIZE 156
+/* Usable memory of project's PC: 2 ^ 21 - 100. */
+#define USABLE_MEMORY_SIZE 2097052
 
 /*----------------------------------------------------------------------------*/
 /*data structues for the E,R,A bits that represents encoding type*/
@@ -39,26 +40,7 @@ typedef struct
 } encoded_IC;
 
 /*----------------------------------------------------------------------------*/
-/*a struct for label or immediate encoding
-
-ARE - 
-00 – Absolute (A): Immediate values or internal constants
-
-01 – Relocatable (R): Refers to a symbol defined in the same program
-
-10 – External (E): Refers to a symbol defined outside the current file
-
-Bit size: 2 bits
-
-Address - Holds the actual value or address.
-
-If it's an immediate operand, this is the immediate value itself.
-
-If it's a label, this is the address of the label in memory.
-
-Bit size: 12 bits
-
-*/
+/*a struct for label or immediate encoding*/
 typedef struct 
 {
 	unsigned int ARE: 3; 
@@ -100,4 +82,4 @@ typedef struct externList
 } externList;
 /*----------------------------------------------------------------------------*/
 
-#endif /* ASSEMBLER_DATA_H */
+#endif /* ENCODING_DATA */

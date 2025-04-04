@@ -1,9 +1,9 @@
 #ifndef PROCESS_DATA_H
 #define PROCESS_DATA_H
-#include "manager.h"
-#include "assembler_data.h"
-#include "enable_bool.h"
+
 #include "symbol_repo.h"
+#include "assembler_config_data.h"
+#include "enable_bool.h"
 #include "technical_functions.h"
 
 /*----------------------------------------------------------------------------*/

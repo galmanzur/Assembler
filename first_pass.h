@@ -1,8 +1,8 @@
 #ifndef FIRST_PASS_H
 #define FIRST_PASS_H
 
-#include "manager.h"
-#include "assembler_data.h"
+#include "assembler_config_data.h"
+#include "encoding_data.h"
 #include "technical_functions.h"
 #include "symbol_repo.h"
 #include "enable_bool.h"
@@ -20,8 +20,6 @@ bool call_first_pass(symbol** symbol_table, char *filename, int *IC, int *DC);
 /*----------------------------------------------------------------------------*/
 /*function to validate line syntax*/
 bool process_line(char* line, int cline, int *DC, symbol** symbol_table);
-
-
 
 /*----------------------------------------------------------------------------*/
 /*a function assuming only .data or .string can apear in line 

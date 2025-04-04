@@ -2,8 +2,9 @@
 #define MAIN_H
 
 #include "file_service.h"
-#include "manager.h"
-#include "assembler_data.h"
+#include "addressing_service.h"
+#include "process_data.h"
+#include "assembler_config_data.h"
 #include "enable_bool.h"
 #include "pre_assembler.h"
 #include "parser.h"

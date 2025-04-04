@@ -7,13 +7,12 @@ all validation passed in first and second pass*/
 bool second_pass(char* filename, codeimage** current, symbol **symbol_table,
     int* DC, int* IC, int data_image[], externList** extern_list)
 {
-/*
 int cline = 0;
 bool is_valid = true;
 char* original_name = add_extension(filename, ".am");
 char buffer[MAX_LINE], buffer_copy[MAX_LINE];
 FILE* origin_ptr;
-if(!is_file_readable(original_name))
+if(!check_file(original_name))
 return false;
 origin_ptr = fopen(original_name, "r");
 (*IC) = 100;
@@ -39,10 +38,8 @@ write_extern(*extern_list, filename);
 }
 free(original_name);
 fclose(origin_ptr);
-*/
 return true;
 }
-
 
 /*----------------------------------------------------------------------------*/
 /*function to destroy externalList after all extern labels are being written

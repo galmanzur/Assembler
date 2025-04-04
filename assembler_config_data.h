@@ -1,5 +1,5 @@
-#ifndef MANAGER_H
-#define MANAGER_H
+#ifndef ASSEMBLER_CONFIG_DATA_H
+#define ASSEMBLER_CONFIG_DATA_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,17 +13,15 @@ in our tasks assembly and compouter*/
 #define NUM_REGISTERS 8
 #define NUM_INSTRUCTIONS 4
 
-/*the assembly language opcodes array, the index of each opcode in the array 
-is given by the value it gets in machine language*/
-
-
-/*the 8 registers r0-r7 of the CPU placed in the imaginery computer for this 
-task*/
+/* The 8 registers r0-r7 of the CPU */
 extern const char *registers[NUM_REGISTERS];
 
-/*array of valid instructions for data types of the assembler*/
+/* Array of valid instructions for data types of the assembler. "
+ * These instructions are used to define data/string and entry/extern. */
 extern const char *instructions[NUM_INSTRUCTIONS];
 
+/* The opcodes of the assembler. Each opcode has a name, an opcode number,
+ * a function code, and the number of parameters it takes. */
 typedef struct
 {
 	char* name;
@@ -32,9 +30,9 @@ typedef struct
 	int params_num;
 } opcode;
 
+/* The opcodes array contains all the opcodes used in the assembler. */
 extern const opcode opcodes[NUM_OPCODES];
-/*extern const char *opcodes[NUM_OPCODES];*/
 
-#endif /* MANAGER_H */
+#endif /* ASSEMBLER_CONFIG_DATA */
 
 

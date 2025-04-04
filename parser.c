@@ -13,7 +13,7 @@ bool is_ascii(int c)
 for error handling*/
 bool is_legal_number(char *str)
 {
-	printf("[is_legal_number********]: is_legal_number called with str: %s\n", str);
+	printf("[is_legal_number]: is_legal_number called with str: %s\n", str);
     if (str == NULL)
     	return false;
     if(*str == '\0')
@@ -23,7 +23,7 @@ bool is_legal_number(char *str)
 	{
 		str = str + strspn(str, " \t\n\r"); /*skip spaces*/
 
-		printf("[is_legal_number********]: checking first char: %c\n", *str);	
+		printf("[is_legal_number]: checking first char: %c\n", *str);	
 		/*check for sign - optional*/
 		if (*str == '+' || *str == '-')
 			str++;
@@ -31,17 +31,23 @@ bool is_legal_number(char *str)
 		/*check if the remaining characters are digits*/
 		while (*str != '\0' && *str != ' ' && *str != '\t' && *str != '\n' && *str != '\r')
 		{
-			printf("[is_legal_number********]: checking char: %c\n", *str);
+			printf("[is_legal_number]: checking char: %c\n", *str);
 			if (!isdigit(*str))
 			{
-				printf("[is_legal_number********]: is_legal_number returned false\n");
+				printf("[is_legal_number]: is_legal_number returned false\n");
 				return false;
 			}
 			str++;
 		}
-		printf("[is_legal_number********]: is_legal_number returned true\n");
-		return true;
+		printf("[is_legal_number]: is_legal_number returned true\n");
+		
 	}
+	else
+	{
+		printf("[is_legal_number]: str is NULL\n");
+		return false;
+	}
+	return true;
 	
 }
 
@@ -168,45 +174,37 @@ int how_much_commas(char* line)
 	return counter_comma;
 }
 
-/*checking if word to represent label is safe if it is return true else false + indecative error
-message to user*/
-bool is_safe_label(char *word, int cline)
+bool is_label(char *word, int cline)
 {
+	int length;
 	int i;
-    int length = strlen(word);
-    if (length > 0)
-    {
-    	if(length <= MAX_LABEL && word)
-    	{
-			word = strtok(word, " \t\r\n");
-       		if (isalpha(word[0])) /*checking first character in label name is alphabetical*/
-       		{
-       		   /*  for (i = 1; i < length; i++) /*checking if all characters are alpahnumerical
-       		    {
-       		        if (!isalnum(word[i]))
-       		        {
-       		            printf("ERROR: Invalid character in label '%s' at line %d\n", word, cline);
-       		            return false;
-       		        }
-       		    } */
-       		    if (!is_safe_word(word))
-       		        return true;
-       		    else
-       		    {
-       		        printf("ERROR: Reserved word '%s' used as a label at line %d\n", word, cline);
-       		        return false;
-       		    }
-       		}
-       		else
-       		{
-       		    printf("ERROR: Label '%s' at line %d does not start with an alphabetical character\n", word, cline);
-       		    return false;
-       		}
-   		}
-		else
+	if(word == NULL)
+		return false;
+	word = strtok(word, " \t\r\n"); /*skip spaces*/
+
+    length = strlen(word); /*length of word*/
+
+	if(!(length <= MAX_LABEL && word)) /*checking if label name is in range*/ 
+	{
+		printf("ERROR: Label '%s' at line %d is longer than %d characters. \n", word, cline, MAX_LABEL);
+		return false;
+	}	
+	if (!isalpha(word[0])) /*checking first character in label name is alphabetical*/
+	{
+		printf("ERROR: The first character of label '%s' at line %d doesnt alphabetical. \n", word, cline);
+		return false;
+	}
+	if(is_safe_word(word)) /*checking if word is safe*/		
+	{
+		printf("ERROR: Reserved word '%s' used in label at line %d\n", word, cline);
+		return false;
+	}
+	for (i = 0; i < length; i++) /*checking if label name is in ascii range*/
+	{
+		if (!isalpha(word[i]) && !isdigit(word[i]))
 		{
-		    printf("ERROR: Label '%s' at line %d is longer than %d characters\n", word, cline, MAX_LABEL);
-		    return false;
+			printf("ERROR: Label '%s' at line %d contains invalid characters(alpha characters or digits). \n", word, cline);
+			return false;
 		}
 	}
 	return true;

@@ -1,7 +1,7 @@
 #include "pre_assembler.h"
 /*----------------------------------------------------------------------------*/
 
-void call_pre_assembler(char *input_file, char *output_file) 
+bool call_pre_assembler(char *input_file, char *output_file) 
 {
     int i, j;
     int cline = 0;
@@ -15,6 +15,7 @@ void call_pre_assembler(char *input_file, char *output_file)
     char *word;
     char line_copy[MAX_LINE]; /* line copy before strtok */
     macro *curr_macro;
+    bool is_complete_successfully = true;
 
     src_file = fopen(input_file, "r");
     dst_file = fopen(output_file, "w");
@@ -57,6 +58,7 @@ void call_pre_assembler(char *input_file, char *output_file)
                 {    
                     /*if macro is not safe print ERROR*/ 
                     printf("ERROR: \"%s\" in %d line is reserved word, cannot be macro name.\n",word, cline);
+                    is_complete_successfully = false;
                     macro_lines = (char **) malloc(sizeof(char *) * MAX_LINE);
                     macro_lines[num_lines] = (char *) malloc(strlen(word) + 1);
                     strcpy(macro_lines[num_lines++], word);
@@ -105,6 +107,7 @@ void call_pre_assembler(char *input_file, char *output_file)
     fclose(src_file);
     fclose(dst_file);
     free_macro_table(&macros_list);
+    return is_complete_successfully;
 }
 
 /*

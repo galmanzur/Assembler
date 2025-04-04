@@ -1,9 +1,13 @@
 #ifndef PARSER_H
 #define PARSER_H
+
 #include "symbol_repo.h"
-#include "manager.h"
-#include "assembler_data.h"
+#include "assembler_config_data.h"
 #include "enable_bool.h"
+
+/*----------------------------------------------------------------------------*/
+#define MAX_LABEL 30 /*defining max label size*/
+#define MAX_LINE 81 /*max line in code is 80 + line end '\0' == 81*/
 
 /*----------------------------------------------------------------------------*/
 /*checking if character is in valid ascii table range from 0 to 127
@@ -60,7 +64,7 @@ bool is_register_in_assembler(char *word);
 /*----------------------------------------------------------------------------*/
 /*checking if label is safe if it is return true else false + indicative error
 message to user*/
-bool is_safe_label(char *word, int cline);
+bool is_label(char *word, int cline);
 
 /*----------------------------------------------------------------------------*/
 /* this function checks if a line of assembly code is valid

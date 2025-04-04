@@ -66,7 +66,7 @@ bool process_line(char* line, int cline, int *DC,  symbol** symbol_table)
         printf("[process_line]: Found word => '%s'\n", word);
         token = strchr(word, ':');
         *token = 0;
-        if (!is_safe_label(word, cline))
+        if (!is_label(word, cline))
             return false;
         validate_entry_extern_after_label(line_copy, cline);
         strcpy(label_name, word);
@@ -98,23 +98,23 @@ bool process_line(char* line, int cline, int *DC,  symbol** symbol_table)
             /* Validate source operand */
             param1 = strtok(new_buffer, " ,\t\n");
             param2 = strtok(NULL, " \t\n");
-            if (validate_addressing_type(index, param1, SRC, cline))
+            if (validate_addressing_to_received_opcode_param(index, param1, SRC, cline))
             {
                 if(param1)
                 {
                     tok_count++;
                     /* Validate source operand */
-                    if (!validate_addressing(param1, cline, line_copy_3))                
+                    if (!validate_relevantive_addressing(param1, cline, line_copy_3))                
                         return false;
                 }   
             }
-            if (validate_addressing_type(index, param2, DST, cline))
+            if (validate_addressing_to_received_opcode_param(index, param2, DST, cline))
             {
                 if(param2)  
                 {
                     tok_count++;
                     /* Validate destination operand */
-                    if (!validate_addressing(param2, cline, line_copy_3))
+                    if (!validate_relevantive_addressing(param2, cline, line_copy_3))
                         return false;
                     while(strtok(NULL, " \t\n") !=NULL)
                         tok_count++;

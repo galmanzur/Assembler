@@ -1,9 +1,11 @@
 #ifndef SYMBOL_REPO_H
 #define SYMBOL_REPO_H
+
 #include "enable_bool.h"
-#include "assembler_data.h"
-#include "manager.h"
 #include "parser.h"
+#include "assembler_config_data.h"
+#include "addressing_service.h"
+#include "encoding_service.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

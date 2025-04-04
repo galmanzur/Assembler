@@ -1,5 +1,8 @@
 #include "addressing_service.h"
 
+/*
+Mapping of opcodes to their addressing types for each parameter.
+*/
 const opcode_and_addressing_for_each_param opcodes_table[NUM_OPCODES] = {
     {&opcodes[0], DENY_ONLY_2, ALLOW_1_AND_3}, /* mov */
     {&opcodes[1], DENY_ONLY_2, DENY_ONLY_2}, /* cmp */
@@ -21,8 +24,10 @@ const opcode_and_addressing_for_each_param opcodes_table[NUM_OPCODES] = {
 
 /*----------------------------------------------------------------------------*/
 
-/*getting str and cline and checks immediate adressing validation
-if valid returns true, else return false + indicative error message*/
+/* 
+This function checks if the string is a valid immediate addressing type.
+It assumes string starts with a '#' character and checks if the rest of the string is a valid number.
+*/
 bool validate_immediate(char *str, int cline)
 {
     if(str)
@@ -42,102 +47,72 @@ bool validate_immediate(char *str, int cline)
 if valid returns true, else return false + indicative error message*/
 bool validate_direct_register(char *str, int cline)
 {
+    int i;
+    if(str)
+    {
+        str = strtok(str, " \t\n\r");
+        for (i = 0; i < NUM_REGISTERS; i++)
+        {
+            if (strcmp(str, registers[i]) == 0)            
+                return true;
+        }           
+    }
+    printf("ERROR: %s is invalid direct register addressing in line %d.\n", str, cline);   
+    return false;
+}
+
+    /*
 	int num = atoi(str+1);
 	if(!((0 <= num) && (num <= 7)))
 	{
 		printf("ERROR: %s is invalid direct register addressing in line %d.\n", str, cline);
 		return false;
 	}
-	return true;
-}
+	return true;*/
 
 /*----------------------------------------------------------------------------*/
 
- /*function to get str and cline to check if all addressing is valid
- except for addressing type number 2*/
-bool validate_except_paramjump(char *str, int cline)
+bool validate_relative(char *str, int cline)
 {
-	 /* Identify the type of addressing */
-     addressing_types type = identify_addressing_type(str);
-
-     /* Check if the type is 'param_jump', which should not be handled by this function */
-     if (type == param_jump) {
-         return false;
-     }
- 
-     /* Process the address based on its identified type using a switch statement */
-     switch (type) 
-     {
-         case immediate:
-             return validate_immediate(str, cline);
-
-         case direct:
-             return is_safe_label(str, cline);
-
-             case direct_register:
-             return validate_direct_register(str, cline);
-
-         default:
-             return false;
-     }
-}
-
-/*----------------------------------------------------------------------------*/
-
-/*checking for unnecessary spaces inside param jump*/
-bool has_pjump_spaces(char* str, int cline)
-{
-	while(*str != 0)
-	{
-		if(isspace(*str++))
-		{
-			printf("ERROR: invalid spaces in param jump addressing in line %d.\n", cline);
-			return true;
-		}
-	}
-	return false;
-}
-
-/*----------------------------------------------------------------------------*/
-
-/*assuming all spaces and ',' are validating param_jump addressing type
-with cline for indicative error*/
-bool validate_param_jump(char *line, int cline)
-{
-	int i = 0;
-	/*for ease of use delim is in array*/
-	char *delim[3] = {"(", ",", ")"};
-	char buffer[MAX_LINE], *token;
-	strcpy(buffer, line);
-	while(isspace(buffer[i]))
-		i++; /*label without spaces*/
-	token = strtok(buffer + i, delim[0]);
-	if(is_safe_label(token, cline) || !has_pjump_spaces(token, cline))
-	{
-		for (i = 1; i < 3; i++)
-		{
-			token = strtok(NULL, delim[i]);
-			if(!token)
-				return false;
-			if(has_pjump_spaces(token, cline))
-				return false;
-			if(!validate_except_paramjump(token, cline))
-				return false;
-		}
-	}
-	else
-		return false;
-	return true;
+    str++;
+    if(str)
+    {
+        str = strtok(str, " \t\n\r"); /*skip spaces*/
+        if(is_label(str, cline))
+        {
+            return true;
+        }        
+    }
+    return false;
 }
 
 /*----------------------------------------------------------------------------*/
 
 /*checks if addressing is written correctly*/
-bool validate_addressing(char *str, int cline, char *line)
+bool validate_relevantive_addressing(char *str, int cline, char *line)
 {
-	return (identify_addressing_type(str) != param_jump)?
-		validate_except_paramjump(str,cline):
-		validate_param_jump(line,cline);	
+	 /* Identify the type of addressing */
+     addressing_types type = identify_addressing_type(str);
+ 
+     printf("[Addressing] addressing type: %d, cline: %d\n", type, cline);
+     /* Process the address based on its identified type using a switch statement */
+     switch (type) 
+     {
+        case immediate:
+             return validate_immediate(str, cline);
+
+        case direct:
+             return is_label(str, cline);
+
+        case direct_register:
+             return validate_direct_register(str, cline);
+
+        case relative:
+            return validate_relative(str, cline);
+
+        default:
+             return false;
+     }
 }    
 
 /*----------------------------------------------------------------------------*/
@@ -145,9 +120,9 @@ bool validate_addressing(char *str, int cline, char *line)
 /*function with switch case getting addressing status and 
 addressing type and handel accordingly - will be used in validate addressing
 type*/
-bool is_addressing_types_and_options_matching(addressing_options addressing_option, addressing_types addressing_type)
+bool mapper_addressing_types_and_options(addressing_options addressing_option, addressing_types addressing_type)
 {
-	/*only case look at opcode_table*/
+	/*ook at opcode_table*/
 	switch(addressing_option)
 	{
 		case NONE:
@@ -157,11 +132,11 @@ bool is_addressing_types_and_options_matching(addressing_options addressing_opti
 				return true;
 			break;
 		case DENY_ONLY_2: 
-			if (addressing_type != param_jump)
+			if (addressing_type != relative)
 				return true;
 			break;
 		case ALLOW_1_AND_2:
-			if ((addressing_type == direct)||(addressing_type == param_jump))
+			if ((addressing_type == direct)||(addressing_type == relative))
 				return true;
 			break;
 		case ALLOW_1_AND_3:
@@ -176,7 +151,7 @@ bool is_addressing_types_and_options_matching(addressing_options addressing_opti
 
 /* Definitions of enums and structs should be included here or in a header file. */
 /* This function validates the addressing type for a given opcode parameter (source or destination) */
-bool validate_addressing_type(int index, char* word, int src_or_dst, int cline)
+bool validate_addressing_to_received_opcode_param(int index, char* word, int src_or_dst, int cline)
 {
     /* Choose the addressing option based on the src_or_dst flag */
     /* src_or_dst == 0 for source, 1 for destination */
@@ -186,7 +161,7 @@ bool validate_addressing_type(int index, char* word, int src_or_dst, int cline)
     
     /* Identify the type of addressing from the given word */
     addressing_types addressing_type = identify_addressing_type(word);
-    printf("Addressing recognized! addressing_typw: %d ,in line %d.\n", addressing_type, cline);
+    printf("Addressing recognized! addressing_type number: %d ,in line %d.\n", addressing_type, cline);
     /* Check if no parameters are expected, return true only if no addressing is required */
     if (opcodes[index].params_num == 0) {
         return (addressing_option == NONE);
@@ -198,7 +173,7 @@ bool validate_addressing_type(int index, char* word, int src_or_dst, int cline)
     }
 
     /* Validate if the recognized addressing type matches the allowed options for this opcode */
-    if (!is_addressing_types_and_options_matching(addressing_option, addressing_type)) {
+    if (!mapper_addressing_types_and_options(addressing_option, addressing_type)) {
         /* Print an error message if there is a mismatch */
         printf("ERROR: Invalid addressing type usage in line %d.\n", cline);
         return false;
@@ -221,10 +196,10 @@ addressing_types identify_addressing_type(char *str)
 		return -1;
 	if(is_immediate_addressing(str))
 		return immediate;
-	if (is_direct_register(str))
+	if (is_direct_register_addressing(str))
 		return direct_register;
-	if (is_param_of_jump(str))
-		return param_jump;
+	if (is_relative_addressing(str))
+		return relative;
 	return direct;
 }
 
@@ -237,9 +212,9 @@ bool is_immediate_addressing(char *str)
 
 /*----------------------------------------------------------------------------*/
 /*check if str is of type param_jump addressing*/
-bool is_param_of_jump(char *str)
+bool is_relative_addressing(char *str)
 {
-	str = strstr(str, "(");
+	str = strstr(str, "&");
 	if(!str)
 		return false;
 	return true;
@@ -247,7 +222,7 @@ bool is_param_of_jump(char *str)
 
 /*----------------------------------------------------------------------------*/
 /*check if str is of type direct_register addressing return true or false depends*/
-bool is_direct_register(char *str)
+bool is_direct_register_addressing(char *str)
 {
 	return ((str[0] == 'r') && (strlen(str) == 2) && (isdigit(str[1])));
 }

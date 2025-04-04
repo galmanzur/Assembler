@@ -5,17 +5,16 @@ inside the "" are all ascii, gets string and line
 assuming we get string parameter*/
 int handle_string_statement(char *str, int cline, int *DC)
 {
-    int init_DC = *DC;
+    int DC_to_update = *DC;
 	size_t i, j;
+    printf("[handle_string_statement]: handle_string_statement called with str: %s\n", str);
     if (str == NULL)
     {
     	printf("ERROR: NULL string in line %d.\n", cline);
     	return -1;	
     }
-    for(i = 0; isspace(str[i]) && str[i]; i++)
-    	; /*empty for*/
-    for(j = strlen(str) - 1; isspace(str[j]) && j >= i ; j--)
-    	; /*empty for*/
+    for(i = 0; isspace(str[i]) && str[i]; i++); 
+    for(j = strlen(str) - 1; isspace(str[j]) && j >= i ; j--); 
     if (str[i] != '\"')
     {
         printf("ERROR: invalid string, does not start with \" in line %d.\n", cline);
@@ -34,8 +33,11 @@ int handle_string_statement(char *str, int cline, int *DC)
         printf("ERROR: invalid string, does not end with \" in line %d.\n", cline);
         return -1;
     }
-    (*DC) += (strlen(str) - 3);
-    return init_DC;
+    printf("[handle_string_statement] string: %s\n", str);  
+    printf("up by string length: %d\n", (int)(strlen(str)-4)); /*subtract 2 for the quotes*/
+    (*DC) += (strlen(str)-4); /*subtract 4 for the quotes and // */
+    printf("[handle_string_statement]:  DC= %d\n", DC_to_update);
+    return DC_to_update;
 }
 
 
@@ -54,7 +56,7 @@ int handle_data_statement(char* line, int cline, int *DC)
     /* copy the line to the buffer */
     strcpy(buffer, line);
     /* count the number of tokens, commas, and numbers in the line */
-    token = strtok(buffer, " ,\t\r\n");
+    token = strtok(buffer, " ,\r\t\n");
 
     while (token != NULL)
     {
@@ -74,7 +76,7 @@ int handle_data_statement(char* line, int cline, int *DC)
                 }
             }
         }
-        token = strtok(NULL, ",\t\n");
+        token = strtok(NULL, " ,\r\t\n");
     }
 
     /* check for invalid number of tokens */
@@ -132,7 +134,8 @@ bool handle_symbol_in_line(char* line, int cline, symbol** symbol_table, int *IC
 {
     int param_number = 0;
     symbol* new_symbol;
-    int init_DC;
+    int DC_to_update;
+    int IC_to_update = *IC;
     char buffer[MAX_LINE] = {0};
     char* word;
     char* token;
@@ -144,14 +147,12 @@ bool handle_symbol_in_line(char* line, int cline, symbol** symbol_table, int *IC
     char label_name[MAX_LABEL]= {0};
     char new_buffer[MAX_LINE] = {0};
 
-    int label_IC = *IC;
-
     /* DEBUG: Print the incoming line */
     printf("DEBUG: [handle_symbol_in_line] line %d => '%s'\n", cline, line);
 
     /* Copy the line to local buffers for different parsing needs */
-    strcpy(buffer,     line);
-    strcpy(line_copy,  line);
+    strcpy(buffer,line);
+    strcpy(line_copy, line);
     strcpy(line_copy_2,line);
     strcpy(line_copy_4,line);
 
@@ -190,7 +191,7 @@ bool handle_symbol_in_line(char* line, int cline, symbol** symbol_table, int *IC
     {
         bool param1_reg = false;
         bool param2_reg = false;
-        int tok_count = 0;
+        int counter_tokens = 0;
 
         /* DEBUG: The line appears to have a command => print it */
         printf("DEBUG: Identified command => '%s'\n", word);
@@ -208,7 +209,7 @@ bool handle_symbol_in_line(char* line, int cline, symbol** symbol_table, int *IC
         /*-------------------------------------------------*/
         if ((index = get_opcode(word)) != -1)
         {
-            char *param1 = NULL, *param2 = NULL, *param3 = NULL;
+            char *param1_of_opcode = NULL, *param2_of_opcode = NULL;
 
             /* DEBUG: Print opcode index */
             printf("DEBUG: Opcode '%s' found (index = %d)\n", word, index);
@@ -217,113 +218,73 @@ bool handle_symbol_in_line(char* line, int cline, symbol** symbol_table, int *IC
             (*IC)++;
             printf("DEBUG: IC incremented by 1 for the opcode. IC = %d\n", *IC);
 
-            /* If we detect parentheses, assume we have something like "opcode X(Y), Z" */
-            if (strstr(new_buffer, "("))
-            {
-                param1 = strtok(new_buffer, " ,(\t\n");  /* e.g. X */
-                param2 = strtok(NULL,       " ,\t\n");   /* e.g. Y */
-                param3 = strtok(NULL,       ",)\t\n");   /* e.g. Z after ) */
-            }
-            else if (strstr(new_buffer, ","))
+            if (strstr(new_buffer, ","))
             {
                 /* We only have two operands separated by a comma */
-                param1 = strtok(new_buffer, " ,\t\n");
-                param2 = strtok(NULL,       " \t\n");
+                param1_of_opcode = strtok(new_buffer, " ,\r\t\n");
+                param2_of_opcode = strtok(NULL, " \r\t\n");
             }
             else
             {
                 /* Only one operand or none */
-                param1 = strtok(new_buffer, " \t\n");
+                param1_of_opcode = strtok(new_buffer, " \r\t\n");
             }
 
             /* DEBUG: Print out the operands we found */
-            printf("DEBUG: param1='%s', param2='%s', param3='%s'\n",
-                   (param1 ? param1 : "NULL"),
-                   (param2 ? param2 : "NULL"),
-                   (param3 ? param3 : "NULL"));
+            printf("DEBUG: param1='%s', param2='%s'\n",
+                   (param1_of_opcode ? param1_of_opcode : "NULL"),
+                   (param2_of_opcode ? param2_of_opcode : "NULL"));                  
 
             /* Handle param1 */
-            if (param1)
+            if (param1_of_opcode)
             {
                 param_number++;
-                tok_count++;
-                if (is_register_in_assembler(param1))
+                counter_tokens++;
+                if (is_register_in_assembler(param1_of_opcode))
                 {
                     param1_reg = true;
-                    printf("DEBUG: param1 '%s' is a register\n", param1);
+                    printf("DEBUG: param1 '%s' is a register\n", param1_of_opcode);
                 }
                 else
                 {
                     (*IC)++;
-                    printf("DEBUG: param1 '%s' is not a register => IC++ => %d\n", param1, *IC);
+                    printf("DEBUG: param1 '%s' is not a register => IC++ => %d\n", param1_of_opcode, *IC);
                 }
             }
 
             /* Handle param2 */
-            if (param2)
+            if (param2_of_opcode)
             {
                 param_number++;
-                tok_count++;
+                counter_tokens++;
 
-                if (is_register_in_assembler(param2) && param1_reg)
+                if (is_register_in_assembler(param2_of_opcode) && param1_reg)
                 {
-                    (*IC)++;
                     param2_reg = true;
-                    printf("DEBUG: param2 '%s' is a register + param1 was register => IC++ => %d\n", param2, *IC);
+                    printf("DEBUG: param2 '%s' is a register + param1 was register => IC++ => %d\n", param2_of_opcode, *IC);
                 }
-                else if (is_register_in_assembler(param2) && param3)
+                else 
                 {
-                    /* No increment done here based on the original logic */
-                    printf("DEBUG: param2 '%s' is a register, but param3 also exists => no increment in code.\n", param2);
-                }
-                else if (!is_register_in_assembler(param2) && param1_reg)
-                {
-                    (*IC) += 2;
-                    printf("DEBUG: param2 '%s' is NOT a register, but param1 was => IC += 2 => %d\n", param2, *IC);
-                }
-                else
-                {
-                    (*IC)++;
-                    printf("DEBUG: param2 '%s' => IC++ => %d\n", param2, *IC);
+                    (*IC) += 1;
+                    printf("DEBUG: param2 '%s' is NOT a register, but param1 was => IC += 2 => %d\n", param2_of_opcode, *IC);
                 }
             }
 
-            /* Handle param3 */
-            if (param3)
-            {
-                param_number++;
-                tok_count++;
-
-                if (is_register_in_assembler(param3) && param2_reg)
-                {
-                    (*IC)++;
-                    printf("DEBUG: param3 '%s' is a register & param2 was register => IC++ => %d\n", param3, *IC);
-                }
-                else if (!is_register_in_assembler(param3) && param2_reg)
-                {
-                    (*IC) += 2;
-                    printf("DEBUG: param3 '%s' => param2 was register => IC += 2 => %d\n", param3, *IC);
-                }
-                else
-                {
-                    (*IC)++;
-                    printf("DEBUG: param3 '%s' => IC++ => %d\n", param3, *IC);
-                }
-            }
-
-            /* If we had a label, add or update its symbol entry */
+            /* If label found, add or update its symbol entry */
             if (label_name[0] != '\0')
             {
-                symbol* new_symbol = find_symbol(*symbol_table, label_name);
-                if (new_symbol)
+                symbol* symbol_to_add = find_symbol(*symbol_table, label_name);
+                if (symbol_to_add) /* symbol alredy exists. */
                 {
-                    printf("DEBUG: Updating existing symbol '%s' address to %d\n", label_name, label_IC);
-                    new_symbol->address = label_IC;
+                    printf("DEBUG: Updating existing symbol '%s' address to %d\n", label_name, IC_to_update);
+                    /* Update the symbol's address and mark it as code */
+                    symbol_to_add->address = IC_to_update;
                 }
                 else
                 {
-                    add_symbol(symbol_table, label_name, label_IC);
-                    printf("DEBUG: Added new symbol '%s' at address %d\n", label_name, label_IC);
+                    /* If the symbol doesn't exist, add it with address IC */
+                    add_symbol(symbol_table, label_name, IC_to_update);
+                    printf("DEBUG: Added new symbol '%s' at address %d\n", label_name, IC_to_update);
                 }
             }
         }
@@ -338,8 +299,8 @@ bool handle_symbol_in_line(char* line, int cline, symbol** symbol_table, int *IC
             {
                 printf("new_buffer: %s\n", new_buffer);
                 
-                init_DC = handle_data_statement(new_buffer, cline, DC);
-                if (init_DC == -1)
+                DC_to_update = handle_data_statement(new_buffer, cline, DC);
+                if (DC_to_update == -1)
                 {
                     return false;
                 }
@@ -348,14 +309,14 @@ bool handle_symbol_in_line(char* line, int cline, symbol** symbol_table, int *IC
                 if (new_symbol)
                 {
                     new_symbol->isData  = true;
-                    new_symbol->address = init_DC;
-                    printf("DEBUG: Updated symbol '%s' => address %d, isData=true\n", label_name, init_DC);
+                    new_symbol->address = DC_to_update;
+                    printf("DEBUG: Updated symbol '%s' => address %d, isData=true\n", label_name, DC_to_update);
                 }
                 else if(label_name[0] != '\0')
                 {
-                    add_symbol(symbol_table, label_name, init_DC);
+                    add_symbol(symbol_table, label_name, DC_to_update);
                     (find_symbol(*symbol_table, label_name))->isData = true;
-                    printf("DEBUG: Added symbol '%s' => address %d, isData=true\n", label_name, init_DC);
+                    printf("DEBUG: Added symbol '%s' => address %d, isData=true\n", label_name, DC_to_update);
                 }
             }
             else if (strcmp(instructions[index], ".string") == 0)
@@ -418,10 +379,10 @@ bool handle_symbol_in_line(char* line, int cline, symbol** symbol_table, int *IC
             symbol* new_symbol;
             printf("DEBUG: Found '.extern' directive\n");
 
-            word = strtok(NULL, " \t\n"); /* symbol after .extern */
+            word = strtok(NULL, " \t\n\r"); /* symbol after .extern */
             if (word)
             {
-                word[strcspn(word, "\r\n")] = '\0'; /* remove newline */
+                word[strcspn(word, "\t\r\n")] = '\0'; /* remove newline */
                 new_symbol = add_symbol(symbol_table, word, 0);
                 new_symbol->isExt = true;
                 printf("DEBUG: Added extern symbol '%s' => address 0, isExt=true\n", word);

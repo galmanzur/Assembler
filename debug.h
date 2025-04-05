@@ -1,7 +1,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include "symbol_repo.h"
+#include "manager.h"
+#include "symbol_defenition.h"
 #include <string.h>
 
 /*----------------------------------------------------------------------------*/

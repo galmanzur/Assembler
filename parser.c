@@ -176,15 +176,22 @@ int how_much_commas(char* line)
 
 bool is_label(char *word, int cline)
 {
-	int length;
-	int i;
-	if(word == NULL)
-		return false;
+	int length, i;
 	word = strtok(word, " \t\r\n"); /*skip spaces*/
 
+	if(!word) 
+	{
+		printf("Label is NULL in line %d\n", cline);
+		return false;
+	}
     length = strlen(word); /*length of word*/
+	if(length == 0) /*if word is empty*/
+	{
+		printf("Label is empty in line %d\n", cline);
+		return false;
+	}
 
-	if(!(length <= MAX_LABEL && word)) /*checking if label name is in range*/ 
+	if(length > MAX_LABEL) /*checking if label name is in range*/ 
 	{
 		printf("ERROR: Label '%s' at line %d is longer than %d characters. \n", word, cline, MAX_LABEL);
 		return false;
@@ -205,6 +212,49 @@ bool is_label(char *word, int cline)
 		{
 			printf("ERROR: Label '%s' at line %d contains invalid characters(alpha characters or digits). \n", word, cline);
 			return false;
+		}
+	}
+	return true;
+}
+
+/*checking if word to represent label is safe if it is return true else false + indecative error
+message to user*/
+bool is_safe_label(char *word, int cline)
+{
+	int i;
+    int length = strlen(word);
+    if (length > 0)
+    {
+    	if(length <= MAX_LABEL)
+    	{
+       		if (isalpha(word[0])) /*checking first character in label name is alphabetical*/
+       		{
+       		    for (i = 1; i < length; i++) /*checking if all characters are alpahnumerical*/
+       		    {
+       		        if (!isalnum(word[i]))
+       		        {
+       		            printf("ERROR: Invalid character in label '%s' at line %d\n", word, cline);
+       		            return false;
+       		        }
+       		    }
+       		    if (!is_safe_word(word))
+       		        return true;
+       		    else
+       		    {
+       		        printf("ERROR: Reserved word '%s' used as a label at line %d\n", word, cline);
+       		        return false;
+       		    }
+       		}
+       		else
+       		{
+       		    printf("ERROR: Label '%s' at line %d does not start with an alphabetical character\n", word, cline);
+       		    return false;
+       		}
+   		}
+		else
+		{
+		    printf("ERROR: Label '%s' at line %d is longer than %d characters\n", word, cline, MAX_LABEL);
+		    return false;
 		}
 	}
 	return true;

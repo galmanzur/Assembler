@@ -2,7 +2,6 @@
 #define PRE_ASSEMBLER_H
 
 #include "macro_repo.h"
-#include "assembler_config_data.h"
 #include "enable_bool.h"
 #include "parser.h"
 #include <stdio.h>

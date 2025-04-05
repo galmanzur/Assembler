@@ -16,16 +16,13 @@ void extract_params(char buffer[], char new_buffer[])
  {
 	char *token, index;
 	strcpy(new_buffer, buffer);
-	token = strtok(new_buffer," \t\n");
+	token = strtok(new_buffer," \r\t\n");
 	if(new_buffer[strlen(new_buffer)-1] == ':')
-		token = strtok(NULL, " \t\n"); /*token is on opcode*/
+		token = strtok(NULL, " \r\t\n"); /*token is on opcode*/
 	token = token + strlen(token); /*params*/
 	index = token - new_buffer;
 	strcpy(new_buffer, buffer + index);
 }
-
-
-
 
 
 /*function that get index and return the number of parameters

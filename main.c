@@ -24,9 +24,6 @@
 
 #include "main.h"
 
-char *extension_file_source = ".as"; /*variable to store the extension of file as file*/
-char *extension_file_after_preassembler = ".am";  /*varaiable to store the extension of spread file*/
-
 
 /*main function that use all other function of assembler to create our two pass
 assembler*/
@@ -63,8 +60,8 @@ int main(int argc, char *argv[])
         extern_list = NULL; 
     
         /* Preparing files to assembler - assumes the user provided file without extension */
-        source_file = add_extension(argv[i], extension_file_source); /*changing name to name of file by adding file extension*/
-        file_after_preassembler = add_extension(argv[i], extension_file_after_preassembler);/*changing name to name of file by adding file extension*/
+        source_file = add_extenstion_to_file(argv[i], extension_file_source); /*changing name to name of file by adding file extension*/
+        file_after_preassembler = add_extenstion_to_file(argv[i], extension_file_after_preassembler);/*changing name to name of file by adding file extension*/
 
         if(is_file_readable(source_file))
         {
@@ -74,7 +71,7 @@ int main(int argc, char *argv[])
                 if(call_first_pass(&symbol_table, file_after_preassembler, &IC, &DC)) /*first pass stage*/
                 {
                     printf("First pass completed.\n");
-                    if(second_pass(file_after_preassembler, &code_table, &symbol_table, &DC, &IC, data_image, &extern_list)) /*second pass stage*/
+                    if(second_pass(argv[i], &code_table, &symbol_table, &DC, &IC, data_image, &extern_list)) /*second pass stage*/
                     {
                         printf("Second pass completed.\n");
 

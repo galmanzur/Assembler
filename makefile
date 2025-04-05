@@ -1,7 +1,10 @@
 all: assembler
 
-assembler: file_service.o first_pass.o macro_repo.o main.o assembler_config_data.o parser.o pre_assembler.o second_pass.o symbol_repo.o addressing_service.o process_data.o technical_functions.o debug.o encoding_service.o
-	gcc -ansi -Wall -pedantic -o assembler file_service.o first_pass.o macro_repo.o main.o assembler_config_data.o parser.o pre_assembler.o second_pass.o symbol_repo.o addressing_service.o process_data.o technical_functions.o debug.o encoding_service.o
+assembler: file_service.o first_pass.o macro_repo.o main.o manager.o parser.o pre_assembler.o second_pass.o symbol_repo.o addressing_service.o process_data.o technical_functions.o debug.o encoding_service.o
+	gcc -ansi -Wall -pedantic -o assembler file_service.o first_pass.o macro_repo.o main.o manager.o parser.o pre_assembler.o second_pass.o symbol_repo.o addressing_service.o process_data.o technical_functions.o debug.o encoding_service.o
+
+manager.o: manager.c manager.h
+	gcc -ansi -Wall -pedantic -c manager.c
 
 symbol_repo.o: symbol_repo.c symbol_repo.h
 	gcc -ansi -Wall -pedantic -c symbol_repo.c
@@ -17,9 +20,6 @@ macro_repo.o: macro_repo.c macro_repo.h
 
 main.o: main.c main.h
 	gcc -ansi -Wall -pedantic -c main.c
-
-assembler_config_data.o: assembler_config_data.c assembler_config_data.h
-	gcc -ansi -Wall -pedantic -c assembler_config_data.c
 
 parser.o: parser.c parser.h
 	gcc -ansi -Wall -pedantic -c parser.c

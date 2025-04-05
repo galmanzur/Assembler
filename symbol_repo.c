@@ -67,7 +67,7 @@ symbol* add_symbol(symbol **symbol_table, char *name, int address)
 /*----------------------------------------------------------------------------*/
 
 /*function to update data symbols because DC and IC are not counted simulatinsely*/
-void update_symbol_address(symbol* symbol_table, int IC)
+void sync_IC_of_data_symbol(symbol* symbol_table, int IC)
 {
     symbol* current = symbol_table;
 

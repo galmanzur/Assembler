@@ -1,9 +1,11 @@
 #ifndef PROCESS_DATA_H
 #define PROCESS_DATA_H
 
-#include "symbol_repo.h"
-#include "assembler_config_data.h"
+#include "manager.h"
 #include "enable_bool.h"
+#include "symbol_defenition.h"
+#include "symbol_repo.h"
+#include "parser.h"
 #include "technical_functions.h"
 
 /*----------------------------------------------------------------------------*/
@@ -20,6 +22,6 @@ int handle_data_statement(char* line, int cline, int *DC);
 
 /*----------------------------------------------------------------------------*/
 /*function to add line synbol to symbol table*/
-bool handle_symbol_in_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC);
+bool process_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC);
 
 #endif/* PROCESS_DATA_H */

@@ -1,21 +1,14 @@
 #ifndef ENCODING_DATA_H
 #define ENCODING_DATA_H
 
-#include "assembler_config_data.h"
-#include "enable_bool.h"
-#include "addressing_service.h"
-#include "process_data.h"
-#include "symbol_repo.h"
-#include "parser.h"
-#include "file_service.h"
-
 /* Usable memory of project's PC: 2 ^ 21 - 100. */
 #define USABLE_MEMORY_SIZE 2097052
 
+/* max label size in assembler language */
+#define MAX_WORDS_FOR_INSTRUCTION 3 
 /*----------------------------------------------------------------------------*/
 /*data structues for the E,R,A bits that represents encoding type*/
 typedef enum {absolute, external, relocatable} encoding_type;
-
 /*----------------------------------------------------------------------------*/
 
 #define SRC 0
@@ -66,7 +59,7 @@ typedef struct codeimage
 		encoded_IC first;
 		label_or_immediate address;
 		register_word reg;
-	} encoded_instruction[4]; /*because max of 4 words in instruction see guide*/
+	} encoded_instruction[MAX_WORDS_FOR_INSTRUCTION]; 
 	int L;
 } codeimage;
 

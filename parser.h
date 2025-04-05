@@ -1,13 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "symbol_repo.h"
-#include "assembler_config_data.h"
+#include "manager.h"
 #include "enable_bool.h"
-
-/*----------------------------------------------------------------------------*/
-#define MAX_LABEL 30 /*defining max label size*/
-#define MAX_LINE 81 /*max line in code is 80 + line end '\0' == 81*/
 
 /*----------------------------------------------------------------------------*/
 /*checking if character is in valid ascii table range from 0 to 127

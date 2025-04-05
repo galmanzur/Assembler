@@ -1,4 +1,4 @@
-#include "assembler_config_data.h"
+#include "manager.h"
 
 /*const char *opcodes[NUM_OPCODES] = {"mov","cmp","add","sub","not","clr","lea","inc","dec","jmp","bne","red","prn","jsr","rts","stop"};*/
 

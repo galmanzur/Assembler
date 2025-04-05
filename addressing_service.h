@@ -2,8 +2,9 @@
 #define ADDRESSING_SERVICE_H
 
 #include "enable_bool.h"
-#include "assembler_config_data.h"
+#include "manager.h"
 #include "technical_functions.h"
+#include "parser.h"
 
 /*data structure for the different 4 addressing method in the assembly 
 language*/

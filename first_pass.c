@@ -16,17 +16,17 @@ bool call_first_pass(symbol** symbol_table, char *filename, int *IC, int *DC)
         strcpy(buffer_copy, buffer);
         if (is_blank_or_comment(buffer))
             continue;
-        if(!process_line(buffer, cline, DC, symbol_table))
+        if(!validate_all_in_line(buffer, cline, DC, symbol_table))
             is_valid = false;
         else
         {
             printf("DEBUG: Processing line %d => %s\n", cline, buffer_copy);
-            handle_symbol_in_line(buffer_copy, cline, symbol_table, IC, DC);
+            process_line(buffer_copy, cline, symbol_table, IC, DC);
             debug_print_symbol_table(*symbol_table);
         }
         printf("DEBUG: Current IC: %d, DC: %d\n", *IC, *DC);
     }
-    update_symbol_address(*symbol_table, *IC);
+    sync_IC_of_data_symbol(*symbol_table, *IC);
     if(is_there_duplicate_symbol(*symbol_table))
         is_valid = false;
     if(is_valid == false)
@@ -42,92 +42,92 @@ bool call_first_pass(symbol** symbol_table, char *filename, int *IC, int *DC)
 /*----------------------------------------------------------------------------*/
 /*function to get line from code and validate its syntax int the assembly
 language*/
-bool process_line(char* line, int cline, int *DC,  symbol** symbol_table)
+bool validate_all_in_line(char* line, int cline, int *DC,  symbol** symbol_table)
 {
     char buffer[MAX_LINE] = {0};
-    char* word;
+    char* word_to_validate;
     char* token;
     int index;
     char line_copy[MAX_LINE]; 
-    char line_copy_2[MAX_LINE];
-    char line_copy_3[MAX_LINE];
+    char line_copy_for_validate_space[MAX_LINE];
+    char line_copy_for_validate_addressing[MAX_LINE];
     char label_name[MAX_LABEL];
     label_name[0] = '\0';
 
+    line = strtok(line, "\r\n"); /* remove new line characters */
     /* Copy the line to line copy */
     strcpy(buffer, line);
     strcpy(line_copy, line);
-    strcpy(line_copy_2, line);
+    strcpy(line_copy_for_validate_space, line);
 
     /* Label handling */
-    word = strtok(line, "\t\n\r");
-    if (is_label_end_with_colon(word))
+    word_to_validate = line;
+    if (is_label_end_with_colon(word_to_validate))
     {   
-        printf("[process_line]: Found word => '%s'\n", word);
-        token = strchr(word, ':');
+        printf("[process_line]: Found word => '%s'\n", word_to_validate);
+        token = strchr(word_to_validate, ':');
         *token = 0;
-        if (!is_label(word, cline))
+        if (!is_label(word_to_validate, cline))
             return false;
         validate_entry_extern_after_label(line_copy, cline);
-        strcpy(label_name, word);
+        strcpy(label_name, word_to_validate);
         token = (*(token + 1) != 0) ? token + 1 : NULL;
-        word = strtok(token, " \t\n");
+        /*word_to_validate = strtok(token, " \r\t\n");*/
     }
-
     /* Check if the line is a command */
-    if (word && is_command(word))
+    if (word_to_validate && is_command(word_to_validate))
     {
-        int tok_count = 0;
+        int count_tokens = 0;
         /* copy parameters in line*/
         char new_buffer[MAX_LINE];
         extract_params(buffer, new_buffer);
-        extract_params(buffer, line_copy_3);
+        extract_params(buffer, line_copy_for_validate_addressing);
 
 
-        printf("line_copy_3: %s\n", line_copy_3);
+        printf("line_copy_3: %s\n", line_copy_for_validate_addressing);
         printf("new_buffer: %s\n", new_buffer);
 
         /* opcode handling */
-        if ((index = get_opcode(word)) != -1)
+        if ((index = get_opcode(word_to_validate)) != -1)
         {
-            char* param1, *param2;
+            char* first_param, *second_param;
             /* Validate line comma and spaces */
             if (!valid_line_comma_spaces(buffer, cline))
                 return false;
 
             /* Validate source operand */
-            param1 = strtok(new_buffer, " ,\t\n");
-            param2 = strtok(NULL, " \t\n");
-            if (validate_addressing_to_received_opcode_param(index, param1, SRC, cline))
+            first_param = strtok(new_buffer, " ,\t\n");
+            second_param = strtok(NULL, " \t\n");
+            if (validate_addressing_to_received_opcode_param(index, first_param, SRC, cline))
             {
-                if(param1)
+                if(first_param)
                 {
-                    tok_count++;
+                    count_tokens++;
                     /* Validate source operand */
-                    if (!validate_relevantive_addressing(param1, cline, line_copy_3))                
+                    if (!validate_relevantive_addressing(first_param, cline, line_copy_for_validate_addressing))                
                         return false;
                 }   
             }
-            if (validate_addressing_to_received_opcode_param(index, param2, DST, cline))
+            if (validate_addressing_to_received_opcode_param(index, second_param, DST, cline))
             {
-                if(param2)  
+                if(second_param)  
                 {
-                    tok_count++;
+                    count_tokens++;
                     /* Validate destination operand */
-                    if (!validate_relevantive_addressing(param2, cline, line_copy_3))
+                    if (!validate_relevantive_addressing(second_param, cline, line_copy_for_validate_addressing))
                         return false;
                     while(strtok(NULL, " \t\n") !=NULL)
-                        tok_count++;
+                        count_tokens++;
                 }
             }
-            if(tok_count >= 3)
+            if(count_tokens >= 3)
             {
                 printf("ERROR: too many tokens in line %d.\n", cline);
                 return false;
             }   
         }
     }
-    else if(!validate_space_after_data_or_string(line_copy_2, cline))
+    else if(!validate_space_after_data_or_string(line_copy_for_validate_space, cline))
         return false;
     /* line does not contain a command */
     return true;

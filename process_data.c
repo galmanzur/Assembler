@@ -34,8 +34,8 @@ int handle_string_statement(char *str, int cline, int *DC)
         return -1;
     }
     printf("[handle_string_statement] string: %s\n", str);  
-    printf("up by string length: %d\n", (int)(strlen(str)-4)); /*subtract 2 for the quotes*/
-    (*DC) += (strlen(str)-4); /*subtract 4 for the quotes and // */
+    printf("up by string length: %d\n", (int)(strlen(str)-2)); /*subtract 2 for the quotes*/
+    (*DC) += (strlen(str)-2); /*subtract 4 for the quotes and // */
     printf("[handle_string_statement]:  DC= %d\n", DC_to_update);
     return DC_to_update;
 }
@@ -130,8 +130,9 @@ int handle_data_statement(char* line, int cline, int *DC)
  * appropriate address and properties. The function also updates the
  * instruction counter (IC) and data counter (DC) as needed.
  *--------------------------------------------------------------------------*/
-bool handle_symbol_in_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC)
+bool process_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC)
 {
+    line = strtok(line, "\r\n"); /* remove new line characters */
     int param_number = 0;
     symbol* new_symbol;
     int DC_to_update;
@@ -189,8 +190,7 @@ bool handle_symbol_in_line(char* line, int cline, symbol** symbol_table, int *IC
     /*-----------------------------------------------------*/
     if (word && is_command(word))
     {
-        bool param1_reg = false;
-        bool param2_reg = false;
+
         int counter_tokens = 0;
 
         /* DEBUG: The line appears to have a command => print it */
@@ -235,14 +235,13 @@ bool handle_symbol_in_line(char* line, int cline, symbol** symbol_table, int *IC
                    (param1_of_opcode ? param1_of_opcode : "NULL"),
                    (param2_of_opcode ? param2_of_opcode : "NULL"));                  
 
-            /* Handle param1 */
+             /* Handle param1 - for add to IC  if param1 was not a register - not direct register addressing */
             if (param1_of_opcode)
             {
                 param_number++;
                 counter_tokens++;
                 if (is_register_in_assembler(param1_of_opcode))
                 {
-                    param1_reg = true;
                     printf("DEBUG: param1 '%s' is a register\n", param1_of_opcode);
                 }
                 else
@@ -252,20 +251,19 @@ bool handle_symbol_in_line(char* line, int cline, symbol** symbol_table, int *IC
                 }
             }
 
-            /* Handle param2 */
+            /* Handle param2 - for add to IC  if param1 was not a register - not direct register addressing */
             if (param2_of_opcode)
             {
                 param_number++;
                 counter_tokens++;
 
-                if (is_register_in_assembler(param2_of_opcode) && param1_reg)
+                if (is_register_in_assembler(param2_of_opcode))
                 {
-                    param2_reg = true;
                     printf("DEBUG: param2 '%s' is a register + param1 was register => IC++ => %d\n", param2_of_opcode, *IC);
                 }
                 else 
                 {
-                    (*IC) += 1;
+                    (*IC)++;
                     printf("DEBUG: param2 '%s' is NOT a register, but param1 was => IC += 2 => %d\n", param2_of_opcode, *IC);
                 }
             }

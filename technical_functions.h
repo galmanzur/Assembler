@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include "assembler_config_data.h"
-#include "addressing_service.h"
 
 /*----------------------------------------------------------------------------*/
 /*assuming line is not destroyed copying parameters in line*/

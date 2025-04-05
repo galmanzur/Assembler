@@ -43,4 +43,5 @@ macro *get_macro_if_equals(macro_table *macros_list, char *name);
 void free_macro_table(macro_table *macro_list);
 
 void print_macro_table(macro_table *table);
+
 #endif /* MACRO_REPO */

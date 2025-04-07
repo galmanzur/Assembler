@@ -8,10 +8,10 @@
 /* symbol structure definition */
 typedef struct symbol
 {
-	char name[MAX_LABEL];
+	char name[MAX_LENGTH_LABEL];
 	int address;
-	bool isExt;
-	bool isEnt;
+	bool isExternal;
+	bool isEntry;
 	bool isData;
 	struct symbol* next;
 } symbol;

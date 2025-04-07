@@ -10,17 +10,15 @@
 #include "encoding_service.h"
 #include "second_pass.h"
 #include "enable_bool.h"
+#include "data_to_file_service.h"
+#include "print_to_console_service.h"
 
-#define MAX_FILENAME 255 /*Maximum chars in file name */
 /*----------------------------------------------------------------------------*/
 extern char *extension_file_source; /*variable to store the extension of file as file*/
 extern char *extension_file_after_preassembler;  /*varaiable to store the extension of after pre assembler file*/
-
 extern char *fentry;
 extern char *fextern;
 extern char *fobject;
-
-
 
 /*----------------------------------------------------------------------------*/
 /*this file gets a pointer to a file name and checks if available for reading 

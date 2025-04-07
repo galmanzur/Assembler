@@ -1,3 +1,11 @@
+/* 
+                                    Addressing Service 🚗🚚✈️
+ * This file contains the function definitions for validating addressing types in assembler.
+ * It includes functions to validate immediate, direct, relative, and direct register addressing types.
+ * The file also contains a function to identify the addressing type of a string and a function to map addressing options to addressing types.
+ * The functions are used in the first pass of the assembler to ensure that the addressing types are valid according to the opcode table.
+ */
+
 #ifndef ADDRESSING_SERVICE_H
 #define ADDRESSING_SERVICE_H
 
@@ -6,12 +14,16 @@
 #include "technical_functions.h"
 #include "parser.h"
 
-/*data structure for the different 4 addressing method in the assembly 
-language*/
-typedef enum {immediate, direct, relative, direct_register} addressing_types;
+/* ----------------------------------------------------------------------------*/
 
-typedef enum {NONE, DENY_ONLY_2, ALLOW_ONLY_1, ALLOW_1_AND_2, ALLOW_1_AND_3} addressing_options;
+/* This enum defines the different addressing types that can be used in the assembler. */ 
+typedef enum {ADDRESSING_IMMEDITAE, ADDRESSING_DIRECT, ADDRESSING_RELATIVE, ADDRESSING_DIRECT_REGISTER} addressing_type_of_opcode;
 
+/* This enum defines the different addressing options that can be used with opcodes - which addressing types are allowed for each opcode. */
+typedef enum {NONE_ADDRESSING_ALLOW, DENY_ONLY_ADDRESSING_2, ALLOW_ONLY_ADDRESSING_1, ALLOW_ADDRESSING_1_AND_2, ALLOW_ADDRESSING_1_AND_3} addressing_option_of_opcode;
+
+/* This struct represents an opcode in the assembler.
+ It contains the opcode number, function code, and the number of parameters required for the opcode. */
 typedef struct opcode_and_addressing_for_each_param
 {
     const opcode *opcode;
@@ -50,7 +62,7 @@ bool validate_relevantive_addressing(char *str, int cline, char *line);
 /*function with switch case getting addressing status and 
 addressing type and handel accordingly - will be used in validate addressing
 type*/
-bool mapper_addressing_types_and_options(addressing_options addressing_option, addressing_types addressing_type);
+bool mapper_addressing_types_and_options(addressing_option_of_opcode addressing_option, addressing_type_of_opcode addressing_type);
 
 
 /*----------------------------------------------------------------------------*/
@@ -58,14 +70,13 @@ bool mapper_addressing_types_and_options(addressing_options addressing_option, a
 assuming src_or_dst is correct and index is correct*/
 bool validate_addressing_to_received_opcode_param(int index, char* word, int src_or_dst, int cline);
 
-/* 
-********************* Functions - Recognizes the addressing type of a string: *********************
-*/
+
+/********************** Functions - Recognizes the addressing type of a string: **********************/
 
 /*----------------------------------------------------------------------------*/
 /*we assume the parameter we get is with no spaces
 This function checks the addressing type of a string and returns the corresponding */
-addressing_types identify_addressing_type(char *str);
+addressing_type_of_opcode identify_addressing_type(char *str);
 
 /*----------------------------------------------------------------------------*/
 /*checking if str is of immediate addressing type */

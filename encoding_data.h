@@ -10,12 +10,20 @@
 /* max label size in assembler language */
 #define MAX_WORDS_FOR_INSTRUCTION 3 
 
+#define START_VALUE_OF_IC 100 /* The starting value of the instruction counter (IC) in the assembler. */
+
+#define START_VALUE_OF_DC 0 /* The starting value of the data counter (DC) in the assembler. */
+
+#define DATA_IMAGE_SIZE 2048
+
+extern int data_image[DATA_IMAGE_SIZE];
+
 /*----------------------------------------------------------------------------*/
 /*data structues for the E,R,A bits that represents encoding type
  * 4 for the third bit (A) of the ARE field in the instruction word.
  * 2 for the second bit(R) of the ARE field in the instruction word.
  * 1 for the first bit(E) of the ARE field in the instruction word. */
-typedef enum {absolute = 4, relocatable = 2, external = 1} encoding_type;
+typedef enum {FLAG_ABSOLUTE = 4, FLAG_RELOCATABLE = 2, FLAG_EXTERNAL = 1} ARE_flag;
 /*----------------------------------------------------------------------------*/
 
 #define SRC 0
@@ -82,7 +90,7 @@ typedef struct externList
 {
 	struct externList *next;
 	int address;
-	char name[MAX_LABEL];
+	char name[MAX_LENGTH_LABEL];
 
 } externList;
 /*----------------------------------------------------------------------------*/

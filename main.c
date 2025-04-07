@@ -31,10 +31,9 @@ int main(int argc, char *argv[])
 {
     int IC;
     int DC;
-    int i;    
-    int j;                        
+    int i;                         
     char *source_file, *file_after_preassembler; /*stores the file name, spreaded file name*/
-    int data_image[2048] = {0}; /*data image buffer*/
+    int data_image[DATA_IMAGE_SIZE] = {0}; /*data image buffer*/
     codeimage* code_table;  
     symbol* symbol_table;         
     externList* extern_list; 
@@ -42,19 +41,17 @@ int main(int argc, char *argv[])
     if (argc == 1)
     {
         /* if no file name is given as argument, print error message*/
-        printf("ERROR: No file name as input.\n");
+        print_global_error("No file name as an input.");
     }
 
     /*for loop to treat each file given as argument in the assembler manner*/
     for (i = 1; i < argc; i++)
     {    
         /*printing the file name given as argument*/
-        printf("Processing file: %s\n", argv[i]);
-        /*initializing the data image buffer to 0*/
-        for(j = 0; j < 2048; j++)
-            data_image[j] = 0;
-        IC = 100; 
-        DC = 0; 
+        print_process_file(argv[i]);
+
+        IC = START_VALUE_OF_IC; 
+        DC = START_VALUE_OF_DC; 
         code_table = NULL;  
         symbol_table = NULL;         
         extern_list = NULL; 
@@ -67,43 +64,31 @@ int main(int argc, char *argv[])
         {
             if(call_pre_assembler(source_file, file_after_preassembler))
             {
-                printf("Pre-Assembler stage completed.\n");
+                print_success("Pre-Assembler stage completed.");
                 if(call_first_pass(&symbol_table, file_after_preassembler, &IC, &DC)) /*first pass stage*/
                 {
-                    printf("First pass completed.\n");
+                    print_success("First pass completed.");
                     if(call_second_pass(argv[i], &code_table, &symbol_table, &DC, &IC, data_image, &extern_list)) /*second pass stage*/
                     {
-                        printf("Second pass completed.\n");
+                        print_success("Second pass completed.");
 
-                        printf("Assembler completed successfully.\n");
+                        print_success("Assembler completed successfully. 💯");
                     }
                     else
-                    {
-                        printf("ERROR: Second pass stage failed.\n");
-                    }
+                        print_global_error("Second pass stage failed.");
                 }
                 else
-                {
-                    printf("ERROR: First pass stage failed.\n");
-                }
+                    print_global_error("First pass stage failed.");
             }
             else
-            {
-                printf("ERROR: Pre-Assembler stage failed.\n");
-            }
-        }
-        else
-        {
-            printf("ERROR: File '%s' is not readable.\n", source_file);
+                print_global_error("Pre-Assembler stage failed.");
         }
         
-        /*desytoying and initializing all parameters used in this run*/
-
         /*freeing all memory used in the assembler*/
         free_symbol_table(symbol_table);
         free_code_image(code_table);
         free_extern_list(extern_list); 
-        memset(data_image, 0, sizeof(data_image));
+        memset(data_image, 0, DATA_IMAGE_SIZE);
         free(source_file);
         free(file_after_preassembler);
     }

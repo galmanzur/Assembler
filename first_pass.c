@@ -6,11 +6,11 @@ bool call_first_pass(symbol** symbol_table, char *filename, int *IC, int *DC)
 {
     int cline = 0;
     bool is_valid = true;
-    char buffer[MAX_LINE];
-    char buffer_copy[MAX_LINE];
-    FILE* fptr;
-    fptr = fopen(filename, "r");
-    while(fgets(buffer, MAX_LINE, fptr))
+    char buffer[MAX_LENGTH_LINE];
+    char buffer_copy[MAX_LENGTH_LINE];
+    FILE* file_to_process;
+    file_to_process = fopen(filename, "r");
+    while(fgets(buffer, MAX_LENGTH_LINE, file_to_process))
     {
         cline++;
         strcpy(buffer_copy, buffer);
@@ -32,10 +32,10 @@ bool call_first_pass(symbol** symbol_table, char *filename, int *IC, int *DC)
     if(is_valid == false)
     {
         printf("CRITICAL: the assembler found errors. Stopping handling of file \"%s\".\n", filename);
-        fclose(fptr);
+        fclose(file_to_process);
         return false;       
     }
-    fclose(fptr);
+    fclose(file_to_process);
     return is_valid;
 }
 
@@ -44,14 +44,14 @@ bool call_first_pass(symbol** symbol_table, char *filename, int *IC, int *DC)
 language*/
 bool validate_all_in_line(char* line, int cline, int *DC,  symbol** symbol_table)
 {
-    char buffer[MAX_LINE] = {0};
+    char buffer[MAX_LENGTH_LINE] = {0};
     char* word_to_validate;
     char* token;
-    int index;
-    char line_copy[MAX_LINE]; 
-    char line_copy_for_validate_space[MAX_LINE];
-    char line_copy_for_validate_addressing[MAX_LINE];
-    char label_name[MAX_LABEL];
+    int index_opcode;
+    char line_copy[MAX_LENGTH_LINE]; 
+    char line_copy_for_validate_space[MAX_LENGTH_LINE];
+    char line_copy_for_validate_addressing[MAX_LENGTH_LINE];
+    char label_name[MAX_LENGTH_LABEL];
     label_name[0] = '\0';
 
     line = strtok(line, "\r\n"); /* remove new line characters */
@@ -79,7 +79,7 @@ bool validate_all_in_line(char* line, int cline, int *DC,  symbol** symbol_table
     {
         int count_tokens = 0;
         /* copy parameters in line*/
-        char new_buffer[MAX_LINE];
+        char new_buffer[MAX_LENGTH_LINE];
         extract_params(buffer, new_buffer);
         extract_params(buffer, line_copy_for_validate_addressing);
 
@@ -88,7 +88,7 @@ bool validate_all_in_line(char* line, int cline, int *DC,  symbol** symbol_table
         printf("new_buffer: %s\n", new_buffer);
 
         /* opcode handling */
-        if ((index = get_opcode(word_to_validate)) != -1)
+        if ((index_opcode = get_opcode(word_to_validate)) != -1)
         {
             char* first_param, *second_param;
             /* Validate line comma and spaces */
@@ -98,7 +98,7 @@ bool validate_all_in_line(char* line, int cline, int *DC,  symbol** symbol_table
             /* Validate source operand */
             first_param = strtok(new_buffer, " ,\t\n");
             second_param = strtok(NULL, " \t\n");
-            if (validate_addressing_to_received_opcode_param(index, first_param, SRC, cline))
+            if (validate_addressing_to_received_opcode_param(index_opcode, first_param, SRC, cline))
             {
                 if(first_param)
                 {
@@ -108,7 +108,7 @@ bool validate_all_in_line(char* line, int cline, int *DC,  symbol** symbol_table
                         return false;
                 }   
             }
-            if (validate_addressing_to_received_opcode_param(index, second_param, DST, cline))
+            if (validate_addressing_to_received_opcode_param(index_opcode, second_param, DST, cline))
             {
                 if(second_param)  
                 {
@@ -127,9 +127,11 @@ bool validate_all_in_line(char* line, int cline, int *DC,  symbol** symbol_table
             }   
         }
     }
+
     else if(!validate_space_after_data_or_string(line_copy_for_validate_space, cline))
         return false;
-    /* line does not contain a command */
+
+    /* Finish to validate the line */
     return true;
 }
 
@@ -168,7 +170,7 @@ bool validate_space_after_data_or_string(char line[], int cline)
 
 /*----------------------------------------------------------------------------*/
 
-/*assuming : exist beacuse was handled before hand*/
+/* This function checks if .entry or .extern appears after a label in the line. If it is, it prints a warning message and returns false. */
 char validate_entry_extern_after_label(char line[], int cline)
 {
     char* colon_ptr = strstr(line, ":");

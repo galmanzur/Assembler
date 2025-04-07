@@ -9,6 +9,7 @@
 #include "second_pass.h"
 #include "symbol_repo.h"
 #include "macro_repo.h"
+#include "print_to_console_service.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

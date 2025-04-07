@@ -32,18 +32,18 @@ void encode_data_words(codeimage* current, symbol *symbol_table, char* source, c
 {
     char* param = source?source:dest;
     int addressing_type = identify_addressing_type(param);
-    int ARE = absolute;
+    int ARE = FLAG_ABSOLUTE;
     symbol* symbol_place = find_symbol(symbol_table, param); 
     int source_val = (source)?atoi(source + 1):0;
     int dest_val = (dest)?atoi(dest + 1):0;
     int address = (symbol_place)?(symbol_place->address):source_val;
     switch(addressing_type)
     {
-        case relative: 
-        case direct:
+        case ADDRESSING_RELATIVE: 
+        case ADDRESSING_DIRECT:
             if(symbol_place)
             {
-                ARE = (symbol_place->isExt)?external:relocatable;
+                ARE = (symbol_place->isExternal)?FLAG_EXTERNAL:FLAG_RELOCATABLE;
                 if(address == 0)
                 {
                     externList* new = calloc(1, sizeof(externList));
@@ -53,7 +53,7 @@ void encode_data_words(codeimage* current, symbol *symbol_table, char* source, c
                     *extern_list = new;
                 }
             }
-        case immediate:
+        case ADDRESSING_IMMEDITAE:
             load_data_word_to_code_image(current, ARE, address); 
             break;
     }
@@ -75,7 +75,7 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
     int funct;
     int params_required;
     int opcode_num;
-    int ARE = absolute; /* value for ARE in command line*/
+    int ARE = FLAG_ABSOLUTE; /* value for ARE in command line*/
 
     /* Remove label from line if it exists */
     /* and check if the line is empty after removing the label */
@@ -115,17 +115,17 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
             source_addressing = identify_addressing_type(source_param_str);
             dest_addressing = identify_addressing_type(dest_param_str);
 
-            if (source_addressing == direct && !find_symbol(symbol_table, source_param_str)) 
+            if (source_addressing == ADDRESSING_DIRECT && !find_symbol(symbol_table, source_param_str)) 
             {
                 printf("ERROR: Undefined label '%s'\n", source_param_str);
                 return false;
             }
-            if (dest_addressing == direct && !find_symbol(symbol_table, dest_param_str)) {
+            if (dest_addressing == ADDRESSING_DIRECT && !find_symbol(symbol_table, dest_param_str)) {
                 printf("ERROR: Undefined label '%s'\n", dest_param_str);
                 return false;
             }
-            reg_source = (source_addressing == direct_register) ? atoi(source_param_str + 1) : 0;
-            reg_dest = (dest_addressing == direct_register) ? atoi(dest_param_str + 1) : 0;
+            reg_source = (source_addressing == ADDRESSING_DIRECT_REGISTER) ? atoi(source_param_str + 1) : 0;
+            reg_dest = (dest_addressing == ADDRESSING_DIRECT_REGISTER) ? atoi(dest_param_str + 1) : 0;
         }
 
         /* Handle opcode with 1 parameter (always will be destination) */
@@ -140,12 +140,12 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
             dest_addressing = identify_addressing_type(dest_param_str);
             source_addressing = 0; /* Just destination operand */
 
-            if (dest_addressing == direct && !find_symbol(symbol_table, dest_param_str)) {
+            if (dest_addressing == ADDRESSING_DIRECT && !find_symbol(symbol_table, dest_param_str)) {
                 printf("ERROR: Undefined label '%s'\n", dest_param_str);
                 return false;
             }
     
-            reg_dest = (dest_addressing == direct_register) ? atoi(dest_param_str + 1) : 0;
+            reg_dest = (dest_addressing == ADDRESSING_DIRECT_REGISTER) ? atoi(dest_param_str + 1) : 0;
         }
 
         /* Handle opcode with 0 parameter (In my assembler, it's will be always rts / stop) */
@@ -169,7 +169,7 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
         /* ----- Fill parameter words ----- */
         if (params_required == 2) 
         {
-            if (source_addressing == direct_register && dest_addressing == direct_register) 
+            if (source_addressing == ADDRESSING_DIRECT_REGISTER && dest_addressing == ADDRESSING_DIRECT_REGISTER) 
             {
                 encode_data_words(current, symbol_table, source_param_str, dest_param_str, extern_list, *IC);
             } 
@@ -197,7 +197,9 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
  */
 bool encode_line(codeimage** current, symbol **symbol_table, char* line, int* DC, int* IC, int data_image[], externList** extern_list)
 {
-    char *word, *token, buffer[MAX_LINE];
+    char *word, *token, buffer[MAX_LENGTH_LINE];
+    directive_type index_directive_type;
+    char param_of_directive_line[MAX_LENGTH_LINE];
     strcpy(buffer, line);
 
     word = strtok(line, " \r\t\n");
@@ -205,11 +207,13 @@ bool encode_line(codeimage** current, symbol **symbol_table, char* line, int* DC
     if(!word) /*if word is NULL then line is empty*/
         return true;
 
+    index_directive_type = get_directive_in_line(word); 
+   
     if (is_label_end_with_colon(word)) /*0 because line is perfect*/
     {
         token = strchr(word, ':');
         *token = 0;
-        token = (*(token + 1) != 0)?token + 1:NULL;
+        token = (*(token + 1) != 0) ? token + 1 : NULL;
     }
 
     /* Check if assembly opcode in assembler*/
@@ -217,18 +221,19 @@ bool encode_line(codeimage** current, symbol **symbol_table, char* line, int* DC
     {
         if(!encode_command_line(current, *symbol_table, buffer ,IC, extern_list))
             return false;
-    }
+    }    
 
-    else if(is_data(word) == 0 || is_data(word) == 1 ) /*because data and string are the first two in array*/
+    else if(index_directive_type == DIRECTIVE_STRING || index_directive_type == DIRECTIVE_DATA ) /*because data and string are the first two in array*/
     {
-        char param_line[MAX_LINE];
-        extract_params(buffer, param_line);
-        if(is_data(word) == 0)
-            encode_instruction_data(param_line, data_image, DC); 
-        if(is_data(word) == 1)
-            encode_instruction_string(param_line, data_image, DC);
+        extract_params(buffer, param_of_directive_line);
 
+            if(index_directive_type == DIRECTIVE_DATA)
+                encode_instruction_data(param_of_directive_line, data_image, DC); 
+   
+            else if(index_directive_type == DIRECTIVE_STRING)
+                encode_instruction_string(param_of_directive_line, data_image, DC);         
     }
+
     return true;
 }
 

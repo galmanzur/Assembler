@@ -11,7 +11,6 @@
 * assuming line is not destroyed */
 void extract_params(char buffer[], char new_buffer[]);
 
-
 /*----------------------------------------------------------------------------*/
 /*a function to take full line of code and retur it without the lable in the 
 beginning if label is present, else returns line as is.*/

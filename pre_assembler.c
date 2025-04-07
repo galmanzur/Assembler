@@ -8,12 +8,12 @@ bool call_pre_assembler(char *input_file, char *output_file)
     FILE *src_file;
     FILE *dst_file;
     macro_table macros_list;
-    char line[MAX_LINE];
+    char line[MAX_LENGTH_LINE];
     bool isMcr = false; /* is macro flag */
     int num_lines = 0;
     char **macro_lines = NULL;
     char *word;
-    char line_copy[MAX_LINE]; /* line copy before strtok */
+    char line_copy[MAX_LENGTH_LINE]; /* line copy before strtok */
     macro *curr_macro;
     bool is_complete_successfully = true;
 
@@ -49,7 +49,7 @@ bool call_pre_assembler(char *input_file, char *output_file)
                 /*checking if macro is safe*/
                 if (!is_safe_word(word)) 
                 {
-                    macro_lines = (char **) malloc(sizeof(char *) * MAX_LINE);
+                    macro_lines = (char **) malloc(sizeof(char *) * MAX_LENGTH_LINE);
                     macro_lines[num_lines] = (char *) malloc(strlen(word) + 1);
                     strcpy(macro_lines[num_lines++], word);
 
@@ -59,7 +59,7 @@ bool call_pre_assembler(char *input_file, char *output_file)
                     /*if macro is not safe print ERROR*/ 
                     printf("ERROR: \"%s\" in %d line is reserved word, cannot be macro name.\n",word, cline);
                     is_complete_successfully = false;
-                    macro_lines = (char **) malloc(sizeof(char *) * MAX_LINE);
+                    macro_lines = (char **) malloc(sizeof(char *) * MAX_LENGTH_LINE);
                     macro_lines[num_lines] = (char *) malloc(strlen(word) + 1);
                     strcpy(macro_lines[num_lines++], word);
                 }

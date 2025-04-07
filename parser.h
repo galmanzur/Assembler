@@ -20,7 +20,7 @@ int get_opcode(char *word);
 
 /*----------------------------------------------------------------------------*/
 /*checking if word is insruction return index in list if it is else return -1*/
-int is_data(char *word);
+directive_type get_directive_in_line(char *word);
 
 /*----------------------------------------------------------------------------*/
 /*chekcing if word is opcode or instruction*/

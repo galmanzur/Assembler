@@ -3,7 +3,7 @@
 /*a fucntion to validate a string strats and ends with ", and the charactets
 inside the "" are all ascii, gets string and line
 assuming we get string parameter*/
-int handle_string_statement(char *str, int cline, int *DC)
+int handle_string_directive_statement(char *str, int cline, int *DC)
 {
     int DC_to_update = *DC;
 	size_t i, j;
@@ -44,9 +44,9 @@ int handle_string_statement(char *str, int cline, int *DC)
 /*assuming opcode was handled before hand and already checked for unnecessary 
 comma at the beginning and end of line, line is destructable
 function to validate a data parameter */
-int handle_data_statement(char* line, int cline, int *DC)
+int handle_data_directive_statement(char* line, int cline, int *DC)
 {   
-    char buffer[MAX_LINE];
+    char buffer[MAX_LENGTH_LINE];
     char* token;
     int init_DC = *DC;
     int num_tokens = 0;
@@ -124,7 +124,7 @@ int handle_data_statement(char* line, int cline, int *DC)
 }
 
 /*----------------------------------------------------------------------------
- * This function is part of the first pass of the assembler.
+ * This function is part of the first pass of the assembler. 
  * Its purpose is to process a given line (already passed syntax validation)
  * and add any label (symbol) from the line to the symbol table with the
  * appropriate address and properties. The function also updates the
@@ -136,16 +136,17 @@ bool process_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC
     symbol* new_symbol;
     int DC_to_update;
     int IC_to_update = *IC;
-    char buffer[MAX_LINE] = {0};
+    char buffer[MAX_LENGTH_LINE] = {0};
     char* word;
     char* token;
-    int index;
-    char line_copy[MAX_LINE]  = {0}; 
-    char line_copy_2[MAX_LINE]= {0};
-    char line_copy_3[MAX_LINE]= {0};
-    char line_copy_4[MAX_LINE]= {0};
-    char label_name[MAX_LABEL]= {0};
-    char new_buffer[MAX_LINE] = {0};
+    int index_opcode;
+    directive_type directive_type;
+    char buffer_copy[MAX_LENGTH_LINE] = {0};
+    char buffer_copy_1[MAX_LENGTH_LINE]  = {0}; 
+    char buffer_copy_2[MAX_LENGTH_LINE]= {0};
+    char buffer_copy_3[MAX_LENGTH_LINE]= {0};
+    char buffer_copy_5[MAX_LENGTH_LINE]= {0};
+    char label_name[MAX_LENGTH_LABEL]= {0};
 
     line = strtok(line, "\r\n"); /* remove new line characters */
     /* DEBUG: Print the incoming line */
@@ -153,9 +154,9 @@ bool process_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC
 
     /* Copy the line to local buffers for different parsing needs */
     strcpy(buffer,line);
-    strcpy(line_copy, line);
-    strcpy(line_copy_2,line);
-    strcpy(line_copy_4,line);
+    strcpy(buffer_copy_1, line);
+    strcpy(buffer_copy_2,line);
+    strcpy(buffer_copy_5,line);
 
     /*-----------------------------------------------------*/
     /* Label handling */
@@ -197,37 +198,37 @@ bool process_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC
         printf("DEBUG: Identified command => '%s'\n", word);
 
         /* Copy parameters in line (operands) */
-        extract_params(buffer, new_buffer);
-        extract_params(buffer, line_copy_3);
+        extract_params(buffer, buffer_copy);
+        extract_params(buffer, buffer_copy_3);
 
         /* DEBUG: Show what was extracted */
-        printf("DEBUG: new_buffer => '%s'\n", new_buffer);
-        printf("DEBUG: line_copy_3 => '%s'\n", line_copy_3);
+        printf("DEBUG: new_buffer => '%s'\n", buffer_copy);
+        printf("DEBUG: line_copy_3 => '%s'\n", buffer_copy_3);
 
         /*-------------------------------------------------*/
-        /* Opcode handling */
+        /* Opcode handling ❕ */
         /*-------------------------------------------------*/
-        if ((index = get_opcode(word)) != -1)
+        if ((index_opcode = get_opcode(word)) != -1)
         {
             char *param1_of_opcode = NULL, *param2_of_opcode = NULL;
 
             /* DEBUG: Print opcode index */
-            printf("DEBUG: Opcode '%s' found (index = %d)\n", word, index);
+            printf("DEBUG: Opcode '%s' found (index = %d)\n", word, index_opcode);
 
             /* Each valid command requires at least one word in memory */
             (*IC)++;
             printf("DEBUG: IC incremented by 1 for the opcode. IC = %d\n", *IC);
 
-            if (strstr(new_buffer, ","))
+            if (strstr(buffer_copy, ","))
             {
                 /* We only have two operands separated by a comma */
-                param1_of_opcode = strtok(new_buffer, " ,\r\t\n");
+                param1_of_opcode = strtok(buffer_copy, " ,\r\t\n");
                 param2_of_opcode = strtok(NULL, " \r\t\n");
             }
             else
             {
                 /* Only one operand or none */
-                param1_of_opcode = strtok(new_buffer, " \r\t\n");
+                param1_of_opcode = strtok(buffer_copy, " \r\t\n");
             }
 
             /* DEBUG: Print out the operands we found */
@@ -288,105 +289,101 @@ bool process_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC
             }
         }
         /*-------------------------------------------------*/
-        /* .data / .string handling */
+        /* Directive handling 💡 */
         /*-------------------------------------------------*/
-        else if ((index = is_data(word)) != -1)
+        else if ((directive_type = get_directive_in_line(word)) != -1)
         {
-            printf("DEBUG: Found data directive => '%s'\n", word);
+            printf("DEBUG: Found directive => '%s'\n", word);
 
-            if (strcmp(instructions[index], ".data") == 0)
+            switch (directive_type)
             {
-                printf("new_buffer: %s\n", new_buffer);
-                
-                DC_to_update = handle_data_statement(new_buffer, cline, DC);
-                if (DC_to_update == -1)
-                {
-                    return false;
-                }
+                case DIRECTIVE_DATA:
+                    printf("new_buffer: %s\n", buffer_copy);
+                    printf("DEBUG: Found data directive => '%s'\n", word);
+                    DC_to_update = handle_data_directive_statement(buffer_copy, cline, DC);
+                    if (DC_to_update == -1)
+                    {
+                        return false;
+                    }
 
-                new_symbol = find_symbol(*symbol_table, label_name);
-                if (new_symbol)
-                {
-                    new_symbol->isData  = true;
-                    new_symbol->address = DC_to_update;
-                    printf("DEBUG: Updated symbol '%s' => address %d, isData=true\n", label_name, DC_to_update);
-                }
-                else if(label_name[0] != '\0')
-                {
-                    add_symbol(symbol_table, label_name, DC_to_update);
-                    (find_symbol(*symbol_table, label_name))->isData = true;
-                    printf("DEBUG: Added symbol '%s' => address %d, isData=true\n", label_name, DC_to_update);
-                }
+                    new_symbol = find_symbol(*symbol_table, label_name);
+                    if (new_symbol)
+                    {
+                        new_symbol->isData  = true;
+                        new_symbol->address = DC_to_update;
+                        printf("DEBUG: Updated symbol '%s' => address %d, isData=true\n", label_name, DC_to_update);
+                    }
+                    else if(label_name[0] != '\0')
+                    {
+                        add_symbol(symbol_table, label_name, DC_to_update);
+                        (find_symbol(*symbol_table, label_name))->isData = true;
+                        printf("DEBUG: Added symbol '%s' => address %d, isData=true\n", label_name, DC_to_update);
+                    }
+                    break;
+                    
+                case DIRECTIVE_STRING: 
+                DC_to_update = handle_string_directive_statement(buffer_copy, cline, DC);
+                    if (DC_to_update == -1)
+                        return false;
+
+                    printf("DEBUG: '.string' statement => updating DC to %d\n", *DC);
+
+                    new_symbol = find_symbol(*symbol_table, label_name);
+                    if (new_symbol)
+                    {
+                        new_symbol->isData  = true;
+                        new_symbol->address = DC_to_update;
+                        printf("DEBUG: Updated symbol '%s' => address %d, isData=true\n", label_name, DC_to_update);
+                    }
+                    else if(label_name[0] != '\0')
+                    {
+                        add_symbol(symbol_table, label_name, DC_to_update);
+                        (find_symbol(*symbol_table, label_name))->isData = true;
+                        printf("DEBUG: Added symbol '%s' => address %d, isData=true\n", label_name, DC_to_update);
+                    }   
+                    break;
+
+                case DIRECTIVE_ENTRY:
+                    printf("DEBUG1: Found '.entry' directive\n");
+
+                    /* use line_copy for .entry handling */
+                    word = strtok(buffer_copy_1, " \t\n"); /* skip .entry? or label? */
+                    word = strtok(NULL,      " \t\n"); /* actual symbol after .entry */
+                    
+                    if (word)
+                    {
+                        word[strcspn(word, "\r\n")] = '\0'; /* remove newline */
+                        new_symbol = find_symbol(*symbol_table, word);
+                        if (new_symbol)
+                        {
+                            new_symbol->isEntry = true;
+                            printf("DEBUG2: Marking symbol '%s' as .entry\n", word);
+                        }
+                        else
+                        {
+                            printf("enter\n");
+                            /* If the symbol doesn't exist, we add it with address IC */
+                            printf("word = **%s**\n", word);
+                            add_symbol(symbol_table, word, *IC);
+                            (find_symbol(*symbol_table, word))->isEntry = true;
+                        }
+                    }
+                    break;
+                case DIRECTIVE_EXTERN:
+                    printf("DEBUG: Found '.extern' directive\n");
+        
+                    word = strtok(NULL, " \t\n\r"); /* symbol after .extern */
+                    if (word)
+                    {
+                        word[strcspn(word, "\t\r\n")] = '\0'; /* remove newline */
+                        new_symbol = add_symbol(symbol_table, word, 0);
+                        new_symbol->isExternal = true;
+                        printf("DEBUG: Added extern symbol '%s' => address 0, isExt=true\n", word);
+                    }
+                    break;   
+                default:
+                    break;
             }
-            else if (strcmp(instructions[index], ".string") == 0)
-            {
-                symbol* new_symbol;
-                int init_DC = handle_string_statement(new_buffer, cline, DC);
-                if (init_DC == -1)
-                    return false;
-
-                printf("DEBUG: '.string' statement => updating DC to %d\n", *DC);
-
-                new_symbol = find_symbol(*symbol_table, label_name);
-                if (new_symbol)
-                {
-                    new_symbol->isData  = true;
-                    new_symbol->address = init_DC;
-                    printf("DEBUG: Updated symbol '%s' => address %d, isData=true\n", label_name, init_DC);
-                }
-                else if(label_name[0] != '\0')
-                {
-                    add_symbol(symbol_table, label_name, init_DC);
-                    (find_symbol(*symbol_table, label_name))->isData = true;
-                    printf("DEBUG: Added symbol '%s' => address %d, isData=true\n", label_name, init_DC);
-                }
-            }
-        }
-        /*-------------------------------------------------*/
-        /* .entry / .extern handling */
-        /*-------------------------------------------------*/
-        if (strcmp(word, ".entry") == 0)
-        {
-            symbol* new_symbol;
-            printf("DEBUG1: Found '.entry' directive\n");
-
-            /* use line_copy for .entry handling */
-            word = strtok(line_copy, " \t\n"); /* skip .entry? or label? */
-            word = strtok(NULL,      " \t\n"); /* actual symbol after .entry */
-            
-            if (word)
-            {
-                word[strcspn(word, "\r\n")] = '\0'; /* remove newline */
-                new_symbol = find_symbol(*symbol_table, word);
-                if (new_symbol)
-                {
-                    new_symbol->isEnt = true;
-                    printf("DEBUG2: Marking symbol '%s' as .entry\n", word);
-                }
-                else
-                {
-                    printf("enter\n");
-                    /* If the symbol doesn't exist, we add it with address IC */
-                    printf("word = **%s**\n", word);
-                    add_symbol(symbol_table, word, *IC);
-                    (find_symbol(*symbol_table, word))->isEnt = true;
-                }
-            }
-        }
-        if (strcmp(word, ".extern") == 0)
-        {
-            symbol* new_symbol;
-            printf("DEBUG: Found '.extern' directive\n");
-
-            word = strtok(NULL, " \t\n\r"); /* symbol after .extern */
-            if (word)
-            {
-                word[strcspn(word, "\t\r\n")] = '\0'; /* remove newline */
-                new_symbol = add_symbol(symbol_table, word, 0);
-                new_symbol->isExt = true;
-                printf("DEBUG: Added extern symbol '%s' => address 0, isExt=true\n", word);
-            }
-        }
     }
     else
     {
@@ -395,5 +392,8 @@ bool process_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC
     }
 
     /* If we reach here, everything succeeded */
+    
+    }
+
     return true;
 }

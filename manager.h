@@ -11,21 +11,20 @@
  * The file also includes function prototypes and external variable declarations. */
 
 /*----------------------------------------------------------------------------*/
-#define MAX_LABEL 30 /*defining max label size*/
-#define MAX_LINE 81 /*max line in code is 80 + line end '\0' == 81*/
+#define MAX_LENGTH_LABEL 30 /*defining max label size*/
+#define MAX_LENGTH_LINE 81 /*max line in code is 80 + line end '\0' == 81*/
 
-#define NUM_OPCODES 16
-#define NUM_REGISTERS 8
-#define NUM_INSTRUCTIONS 4
+#define NUMBER_OF_OPCODES 16
+#define NUMBER_OF_REGISTERS 8
+#define NUMBER_OF_DIRECTIVES 4
 
-typedef enum {DATA, STRING, ENTRY, EXTERN} instructions_types;
+typedef enum {DIRECTIVE_DATA = 0, DIRECTIVE_STRING = 1, DIRECTIVE_ENTRY = 2, DIRECTIVE_EXTERN = 3} directive_type;
+
+/* This list contains the names of the directives used in the assembler. */
+extern const char *directives_str[NUMBER_OF_DIRECTIVES];
 
 /* The 8 registers r0-r7 of the CPU */
-extern const char *registers[NUM_REGISTERS];
-
-/* Array of valid instructions for data types of the assembler. "
- * These instructions are used to define data/string and entry/extern. */
-extern const char *instructions[NUM_INSTRUCTIONS];
+extern const char *registers[NUMBER_OF_REGISTERS];
 
 /* The opcodes of the assembler. Each opcode has a name, an opcode number,
  * a function code, and the number of parameters it takes. */
@@ -38,7 +37,7 @@ typedef struct
 } opcode;
 
 /* The opcodes array contains all the opcodes used in the assembler. */
-extern const opcode opcodes[NUM_OPCODES];
+extern const opcode opcodes[NUMBER_OF_OPCODES];
 
 #endif /* MANAGER_H */
 

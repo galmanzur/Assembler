@@ -30,6 +30,4 @@ bool validate_space_after_data_or_string(char line[], int cline);
 /*assuming : exist beacuse was handled before hand*/
 char validate_entry_extern_after_label(char line[], int cline);
 
-
-
 #endif /* FIRST_PASS_H */

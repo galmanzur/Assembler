@@ -59,20 +59,20 @@ int get_opcode(char *word)
 	if(!word)
 		return -1; 
     /*comparing if name is one conatianed in saved opcodes */
-    for (i = 0; i < NUM_OPCODES; i++)
+    for (i = 0; i < NUMBER_OF_OPCODES; i++)
         if (strcmp(word, opcodes[i].name) == 0) 
             return i;
     return -1;
 }
 
 /*----------------------------------------------------------------------------*/
-/*checking if word is insruction return index in list if it is else return -1*/
-instructions_data_types is_data(char *word)
+/* This functuin checks if word is directive return index in enum list if it is else return -1*/
+directive_type get_directive_in_line(char *word)
 {
 	int i;
-    /*check if the word is one contained in the saved instrictions*/
-    for (i = 0; i < NUM_INSTRUCTIONS; i++) 
-        if (strcmp(word, instructions[i]) == 0) 
+
+    for (i = 0; i < NUMBER_OF_DIRECTIVES; i++) 
+        if (strcmp(word, directives_str[i]) == 0) 
             return i;
     return -1; 	
 }
@@ -81,7 +81,7 @@ instructions_data_types is_data(char *word)
 /*chekcing if word is opcode or instruction*/
 bool is_command(char *word)
 {
-	return (get_opcode(word) != -1) || (is_data(word)  != -1);
+	return (get_opcode(word) != -1) || (get_directive_in_line(word)  != -1);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -89,7 +89,7 @@ bool is_command(char *word)
 bool is_register_in_assembler(char *word)
 {
 	int i;
-	for (i = 0; i < NUM_REGISTERS; i++) 
+	for (i = 0; i < NUMBER_OF_REGISTERS; i++) 
     if (strcmp(word, registers[i]) == 0) 
         return true;
     return false;
@@ -107,7 +107,7 @@ bool is_safe_word(char *word)
 /*function to check if line is blank or comment line*/
 bool is_blank_or_comment(char* line)
 {
-	char buffer[MAX_LINE], *word;
+	char buffer[MAX_LENGTH_LINE], *word;
 	strcpy(buffer, line);
 	word = strtok(buffer, " \t\n\r");
 	if(!word) 
@@ -191,9 +191,9 @@ bool is_label(char *word, int cline)
 		return false;
 	}
 
-	if(length > MAX_LABEL) /*checking if label name is in range*/ 
+	if(length > MAX_LENGTH_LABEL) /*checking if label name is in range*/ 
 	{
-		printf("ERROR: Label '%s' at line %d is longer than %d characters. \n", word, cline, MAX_LABEL);
+		printf("ERROR: Label '%s' at line %d is longer than %d characters. \n", word, cline, MAX_LENGTH_LABEL);
 		return false;
 	}	
 	if (!isalpha(word[0])) /*checking first character in label name is alphabetical*/
@@ -225,7 +225,7 @@ bool is_safe_label(char *word, int cline)
     int length = strlen(word);
     if (length > 0)
     {
-    	if(length <= MAX_LABEL)
+    	if(length <= MAX_LENGTH_LABEL)
     	{
        		if (isalpha(word[0])) /*checking first character in label name is alphabetical*/
        		{
@@ -253,7 +253,7 @@ bool is_safe_label(char *word, int cline)
    		}
 		else
 		{
-		    printf("ERROR: Label '%s' at line %d is longer than %d characters\n", word, cline, MAX_LABEL);
+		    printf("ERROR: Label '%s' at line %d is longer than %d characters\n", word, cline, MAX_LENGTH_LABEL);
 		    return false;
 		}
 	}

@@ -11,13 +11,13 @@ char *fobject = ".ob";
 /*check if file exists with right permissions*/
 bool is_file_readable(char* filename)
 {
-    FILE* file = fopen(filename, "r");
-    if(!file)
+    FILE* file_to_read = fopen(filename, "r");
+    if(!file_to_read)
     {
-        printf("CRITICAL:%s cannot be opened.\n", filename);
+        print_global_error("File can not be opened.");
         return false;
     }
-    fclose(file); /*closing if succeeded*/
+    fclose(file_to_read); /*closing if succeeded*/
     return true;
 }
 
@@ -54,7 +54,7 @@ void create_entry_file(symbol* head, char* filename)
 	FILE* file = NULL;
     while (head != NULL) 
     {
-        if ((head->isEnt) == true )
+        if ((head->isEntry) == true )
         {
             if(!file)
                 file = fopen(entry_name, "w");
@@ -104,7 +104,7 @@ void create_object_file(char* filename, codeimage* current, int DC, int IC, int 
     write_code_image_to_file_in_hexa(current, object_file);
 
     /* Write the data image to the object file */
-    write_data_image_to_file(data_image, DC, IC, object_file);
+    write_data_image_to_file_in_hexa(data_image, DC, IC, object_file);
 
     /* Close the object file */
     fclose(object_file);

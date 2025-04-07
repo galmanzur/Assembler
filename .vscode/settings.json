@@ -1,6 +1,7 @@
 {
     "C_Cpp.dimInactiveRegions": false,
     "files.associations": {
-        "assembler_config_data.h": "c"
+        "assembler_config_data.h": "c",
+        "print_to_console_service.h": "c"
     }
 }

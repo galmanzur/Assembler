@@ -20,10 +20,10 @@ void free_symbol_table(symbol *symbol_table)
 symbol* create_symbol(char* name, int address) 
 {
     symbol* new_symbol = (symbol*) malloc(sizeof(symbol));
-    strncpy(new_symbol->name, name, MAX_LABEL);
+    strncpy(new_symbol->name, name, MAX_LENGTH_LABEL);
     new_symbol->address = address;
-    new_symbol->isExt = false;
-    new_symbol->isEnt = false;
+    new_symbol->isExternal = false;
+    new_symbol->isEntry = false;
     new_symbol->isData = false;
     new_symbol->next = NULL;
     return new_symbol;

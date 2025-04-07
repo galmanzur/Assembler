@@ -12,13 +12,13 @@
 /*a fucntion to validate a string strats and ends with ", and the charactets
 inside the "" are all ascii, gets string and line
 assuming we get string parameter*/
-int handle_string_statement(char *str, int cline, int *DC);
+int handle_string_directive_statement(char *str, int cline, int *DC);
 
 /*----------------------------------------------------------------------------*/
 /*assuming opcode was handled before hand and already checked for unnecessary 
 comma at the beginning and end of line, line is destructable
 function to validate a data parameter */
-int handle_data_statement(char* line, int cline, int *DC);
+int handle_data_directive_statement(char* line, int cline, int *DC);
 
 /*----------------------------------------------------------------------------*/
 /*function to add line synbol to symbol table*/

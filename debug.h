@@ -14,6 +14,4 @@
 purposes and can be used by task grader to check code correction*/
 void debug_print_symbol_table(symbol *head);
 
-void print_codeimage_debug(codeimage* head_code_image);
-
 #endif /* DEBUG_H */

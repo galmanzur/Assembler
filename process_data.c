@@ -132,8 +132,7 @@ int handle_data_statement(char* line, int cline, int *DC)
  *--------------------------------------------------------------------------*/
 bool process_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC)
 {
-    line = strtok(line, "\r\n"); /* remove new line characters */
-    int param_number = 0;
+    /*int how_much_params_in_line;*/
     symbol* new_symbol;
     int DC_to_update;
     int IC_to_update = *IC;
@@ -148,6 +147,7 @@ bool process_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC
     char label_name[MAX_LABEL]= {0};
     char new_buffer[MAX_LINE] = {0};
 
+    line = strtok(line, "\r\n"); /* remove new line characters */
     /* DEBUG: Print the incoming line */
     printf("DEBUG: [handle_symbol_in_line] line %d => '%s'\n", cline, line);
 
@@ -233,12 +233,13 @@ bool process_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC
             /* DEBUG: Print out the operands we found */
             printf("DEBUG: param1='%s', param2='%s'\n",
                    (param1_of_opcode ? param1_of_opcode : "NULL"),
-                   (param2_of_opcode ? param2_of_opcode : "NULL"));                  
-
+                   (param2_of_opcode ? param2_of_opcode : "NULL"));  
+                   
+            /* how_much_params_in_line = 0; */    
              /* Handle param1 - for add to IC  if param1 was not a register - not direct register addressing */
             if (param1_of_opcode)
             {
-                param_number++;
+                /*how_much_params_in_line++;*/
                 counter_tokens++;
                 if (is_register_in_assembler(param1_of_opcode))
                 {
@@ -254,7 +255,7 @@ bool process_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC
             /* Handle param2 - for add to IC  if param1 was not a register - not direct register addressing */
             if (param2_of_opcode)
             {
-                param_number++;
+                /*how_much_params_in_line++;*/
                 counter_tokens++;
 
                 if (is_register_in_assembler(param2_of_opcode))

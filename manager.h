@@ -18,6 +18,8 @@
 #define NUM_REGISTERS 8
 #define NUM_INSTRUCTIONS 4
 
+typedef enum {DATA, STRING, ENTRY, EXTERN} instructions_types;
+
 /* The 8 registers r0-r7 of the CPU */
 extern const char *registers[NUM_REGISTERS];
 

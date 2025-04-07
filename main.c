@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
                 if(call_first_pass(&symbol_table, file_after_preassembler, &IC, &DC)) /*first pass stage*/
                 {
                     printf("First pass completed.\n");
-                    if(second_pass(argv[i], &code_table, &symbol_table, &DC, &IC, data_image, &extern_list)) /*second pass stage*/
+                    if(call_second_pass(argv[i], &code_table, &symbol_table, &DC, &IC, data_image, &extern_list)) /*second pass stage*/
                     {
                         printf("Second pass completed.\n");
 
@@ -101,8 +101,8 @@ int main(int argc, char *argv[])
 
         /*freeing all memory used in the assembler*/
         free_symbol_table(symbol_table);
-        /*destroy_codeimage(code_table);
-        destroy_externlist(extern_list); */
+        free_code_image(code_table);
+        free_extern_list(extern_list); 
         memset(data_image, 0, sizeof(data_image));
         free(source_file);
         free(file_after_preassembler);

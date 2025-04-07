@@ -1,7 +1,7 @@
 all: assembler
 
-assembler: file_service.o first_pass.o macro_repo.o main.o manager.o parser.o pre_assembler.o second_pass.o symbol_repo.o addressing_service.o process_data.o technical_functions.o debug.o encoding_service.o
-	gcc -ansi -Wall -pedantic -o assembler file_service.o first_pass.o macro_repo.o main.o manager.o parser.o pre_assembler.o second_pass.o symbol_repo.o addressing_service.o process_data.o technical_functions.o debug.o encoding_service.o
+assembler: file_service.o first_pass.o macro_repo.o main.o manager.o parser.o pre_assembler.o second_pass.o symbol_repo.o addressing_service.o process_data.o technical_functions.o debug.o encoding_service.o encoding_repo.o
+	gcc -ansi -Wall -pedantic -o assembler file_service.o first_pass.o macro_repo.o main.o manager.o parser.o pre_assembler.o second_pass.o symbol_repo.o addressing_service.o process_data.o technical_functions.o debug.o encoding_service.o encoding_repo.o
 
 manager.o: manager.c manager.h
 	gcc -ansi -Wall -pedantic -c manager.c
@@ -44,6 +44,9 @@ technical_functions.o: technical_functions.c technical_functions.h
 
 encoding_service.o: encoding_service.c encoding_service.h
 	gcc -ansi -Wall -pedantic -c encoding_service.c
+
+encoding_repo.o: encoding_repo.c encoding_repo.h
+	gcc -ansi -Wall -pedantic -c encoding_repo.c	
 
 
 clean:

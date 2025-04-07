@@ -1,1 +1,1 @@
-GALggg: jmp &next
+mov r1, r1

@@ -3,7 +3,7 @@
 /*----------------------------------------------------------------------------*/
 /*function that used the above function, encodes and validates the code if
 all validation passed in first and second pass*/
-bool second_pass(char* filename, codeimage** current, symbol **symbol_table,
+bool call_second_pass(char* filename, codeimage** current, symbol **symbol_table,
     int* DC, int* IC, int data_image[], externList** extern_list)
 {
     int cline = 0;
@@ -37,7 +37,7 @@ bool second_pass(char* filename, codeimage** current, symbol **symbol_table,
         else
         {   
             printf("DEBUG: Processing line %d => %s\n", cline, buffer_copy);
-            if(!encode(current, symbol_table, buffer_copy, DC, IC, data_image, extern_list))
+            if(!encode_line(current, symbol_table, buffer_copy, DC, IC, data_image, extern_list))
                 is_valid = false;          
         }
     }
@@ -54,36 +54,52 @@ bool second_pass(char* filename, codeimage** current, symbol **symbol_table,
     return true;
 }
 
-/*----------------------------------------------------------------------------*/
-/*a function to take full line of code and retur it without the lable in the 
-beginning if label is present, else returns line as is.*/
-char* remove_label(char* line)
+
+void write_code_image_to_file_in_hexa(codeimage* head, FILE* file_name)
 {
-    char* ptr = strchr(line, ':');
-    if(ptr)
-        return (ptr + 1);
-    while(isspace(*line))
-        line++;
-    return line;
+    int i;
+    int IC = 100; /* Starting IC address */
+
+    while(head)
+    {
+        for(i = 0; i < head->number_of_words; i++)
+        {
+            unsigned int word = head->encoded_instruction[i].bit & 0xFFFFFF; /* Mask to 24 bits */
+            fprintf(file_name, "%07d\t%06X\n", IC++, word);
+        }
+        head = head->next;
+    }
 }
+
+void write_data_image_to_file_in_hexa(int data_image[], int DC, int IC, FILE* file_name)
+{
+    int i;
+    for(i = 0; i < DC; i++)
+    {
+        unsigned int word = data_image[i] & 0xFFFFFF; /* Mask to 24 bits */
+        fprintf(file_name, "%07d\t%06X\n", i + IC, word);
+    }
+}
+
+
 
 /*----------------------------------------------------------------------------*/
 /*function to print code image in special binary base, will be used later on in
 the write object function*/
-void print_codeimage_table(codeimage* head, FILE* filename)
+void write_code_image_to_file(codeimage* head, FILE* file_name)
 {
     int i, j, IC = 100;
     while(head)
     {
-        for(i = 0; i < head->L; i++)
+        for(i = 0; i < head->number_of_words; i++)
         {
             unsigned int word = head->encoded_instruction[i].bit;
-            fprintf(filename, "0%d\t",IC++);
-            for( j = 13; j >= 0; j--)
+            fprintf(file_name, "0%d\t",IC++);
+            for( j = SIZE_OF_WORD - 1; j >= 0; j--)
             {
-                fprintf(filename, "%c", (((word >> j) & 1) == 0)?'0':'1');
+                fprintf(file_name, "%c", (((word >> j) & 1) == 0)?'0':'1');
             }
-            fprintf(filename, "\n");
+            fprintf(file_name, "\n");
         }
         head = head->next;
     }
@@ -92,17 +108,17 @@ void print_codeimage_table(codeimage* head, FILE* filename)
 /*----------------------------------------------------------------------------*/
 /*functiong to print data image in special binary base, will be used later on
 in the write object function*/
-void print_dataimage(int data_image[], int DC, int IC, FILE* filename)
+void write_data_image_to_file(int data_image[], int DC, int IC, FILE* file_name)
 {
     int i, j;
     for(i = 0; i < DC; i++)
     {
-        fprintf(filename, "0%d\t", i + IC);
-        for( j = 13; j >= 0; j--)
+        fprintf(file_name, "0%d\t", i + IC);
+        for( j = SIZE_OF_WORD - 1; j >= 0; j--)
         {
-            fprintf(filename, "%c", (((data_image[i] >> j) & 1) == 0)?'.':'/');
+            fprintf(file_name, "%c", (((data_image[i] >> j) & 1) == 0)?'0':'1');
         }
-        fprintf(filename, "\n");
+        fprintf(file_name, "\n");
     }
 }
 

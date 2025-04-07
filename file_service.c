@@ -1,9 +1,9 @@
 #include "file_service.h"
 
 
-char *extension_file_source = ".as"; /*variable to store the extension of file as file*/
-char *extension_file_after_preassembler = ".am";  /*varaiable to store the extension of spread file*/
 
+char *extension_file_source = ".as";
+char *extension_file_after_preassembler = ".am";
 char *fentry = ".ent";
 char *fextern = ".ext";
 char *fobject = ".ob";
@@ -90,15 +90,23 @@ void create_extern_file(externList* head, char* filename)
 }
 
 /*----------------------------------------------------------------------------*/
-/*function to handle the writing of machine language to the .ob file for the 
-computer to load to memory and run program*/
+/*function to write the code image and data image to the object file*/
 void create_object_file(char* filename, codeimage* current, int DC, int IC, int data_image[])
 {
     char* object_name = add_extenstion_to_file(filename, fobject);
-    FILE* object_ptr = fopen(object_name, "w");  
-    fprintf(object_ptr, "\t%d\t%d\n", IC - 100, DC);
-    print_codeimage_table(current, object_ptr);
-    print_dataimage(data_image, DC, IC, object_ptr);
-    fclose(object_ptr);
+    /* Open the object file for writing */
+    FILE* object_file = fopen(object_name, "w"); 
+
+    /* Display count of instructions and data in the object file */
+    fprintf(object_file, "\t%d\t%d\n", IC - 100, DC);
+
+    /* Write the code image to the object file */
+    write_code_image_to_file_in_hexa(current, object_file);
+
+    /* Write the data image to the object file */
+    write_data_image_to_file(data_image, DC, IC, object_file);
+
+    /* Close the object file */
+    fclose(object_file);
     free(object_name);
 }

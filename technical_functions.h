@@ -7,11 +7,14 @@
 #include <string.h>
 
 /*----------------------------------------------------------------------------*/
-/*assuming line is not destroyed copying parameters in line*/
+/* function to copy the line to the new buffer and remove the label if present
+* assuming line is not destroyed */
 void extract_params(char buffer[], char new_buffer[]);
 
+
 /*----------------------------------------------------------------------------*/
-/*function that get index and return the number of parameters*/
-/*int param_number(int index); */
+/*a function to take full line of code and retur it without the lable in the 
+beginning if label is present, else returns line as is.*/
+char* remove_label(char* line);
 
 #endif /* TECHNICAL_FUNCTIONS_H */

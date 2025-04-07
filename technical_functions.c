@@ -24,6 +24,19 @@ void extract_params(char buffer[], char new_buffer[])
 	strcpy(new_buffer, buffer + index);
 }
 
+/*----------------------------------------------------------------------------*/
+/*a function to take full line of code and retur it without the lable in the 
+beginning if label is present, else returns line as is.*/
+char* remove_label(char* line)
+{
+    char* ptr = strchr(line, ':');
+    if(ptr)
+        return (ptr + 1);
+    while(isspace(*line))
+        line++;
+    return line;
+}
+
 
 /*function that get index and return the number of parameters
 int param_number(int index)

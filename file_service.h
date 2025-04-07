@@ -1,13 +1,14 @@
 #ifndef FILE_SERVICE_H
 #define FILE_SERVICE_H
 
-#include "manager.h"
-#include "symbol_repo.h"
-#include "encoding_data.h"
-#include "second_pass.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "manager.h"
+#include "symbol_repo.h"
+#include "encoding_data.h"
+#include "encoding_service.h"
+#include "second_pass.h"
 #include "enable_bool.h"
 
 #define MAX_FILENAME 255 /*Maximum chars in file name */
@@ -18,6 +19,8 @@ extern char *extension_file_after_preassembler;  /*varaiable to store the extens
 extern char *fentry;
 extern char *fextern;
 extern char *fobject;
+
+
 
 /*----------------------------------------------------------------------------*/
 /*this file gets a pointer to a file name and checks if available for reading 

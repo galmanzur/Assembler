@@ -67,7 +67,7 @@ int get_opcode(char *word)
 
 /*----------------------------------------------------------------------------*/
 /*checking if word is insruction return index in list if it is else return -1*/
-int is_data(char *word)
+instructions_data_types is_data(char *word)
 {
 	int i;
     /*check if the word is one contained in the saved instrictions*/

@@ -1,77 +1,9 @@
 #include "encoding_service.h"
 
-/*----------------------------------------------------------------------------*/
-
-/*function to check machine code overflow in computer memory 100 words of memory
-are reserver hence machine code of IC + DC can only be 156 memory word*/
-bool is_code_overflow(int IC, int DC)
-{
-	if((IC + DC) > USABLE_MEMORY_SIZE)
-	{
-		printf("ERROR: OVREFLOW! Machine code is greater then 256 memeory words\n");
-		return false;
-	}
-	else
-		return true;
-}
-
-/*----------------------------------------------------------------------------*/
-/*a function to created new code image node of the struct for encoding*/
-codeimage* new_code_image()
-{
-    codeimage* new = calloc(1, sizeof(codeimage));
-    if(!new)
-    {
-        printf("CRITICAL: memory problem!\n");
-        exit(EXIT_FAILURE);
-    }
-    new->L = 0;
-    return new;
-}
-
-
-/*----------------------------------------------------------------------------*/
-/*a function to handle and fill encoding for registers*/
-void fill_register_word(codeimage* current,
-                        unsigned dest, unsigned source)
-{
-    int L = current->L;
-    /*because calloc inits ARE, we do no init ARE*/
-    current->encoded_instruction[L].reg.dest = dest;
-    current->encoded_instruction[L].reg.source = source;  
-    current->L++;
-}
-
-/*----------------------------------------------------------------------------*/
-/*a function to handle and fill encoding for lables or parameters of immediate
-addressing type*/
-void fill_label_or_immediate(codeimage* current, unsigned ARE, unsigned address)
-{
-    int L = current->L;
-    /*because calloc inits ARE, we do no init ARE*/
-    current->encoded_instruction[L].address.ARE = ARE;
-    current->encoded_instruction[L].address.address = address;  
-    current->L++;
-}
-
-/*----------------------------------------------------------------------------*/
-/*a function to fill word for the encoded IC word*/
-void fill_encoded_IC(codeimage* current, unsigned dest,
-    unsigned source, unsigned opcode, unsigned register_dest, unsigned register_source)
-    {
-        int L = current->L;
-        /*because calloc inits ARE, we do no init ARE*/
-        current->encoded_instruction[L].first.dest = dest;
-        current->encoded_instruction[L].first.source = source;
-        current->encoded_instruction[L].first.opcode = opcode;
-        current->encoded_instruction[L].first.register_dest = register_dest;
-        current->encoded_instruction[L].first.register_source = register_source;
-        current->L++;
-    }
-    
+   
 /*----------------------------------------------------------------------------*/
 /*a function to handldle data encoding (numbers) in the second pass*/
-void encode_data(char *param_line, int data_image[], int *DC)
+void encode_instruction_data(char *param_line, int data_image[], int *DC)
 {
     char* token = strtok(param_line, " ,\r\t\n");
     while(token)
@@ -83,7 +15,7 @@ void encode_data(char *param_line, int data_image[], int *DC)
 
 /*----------------------------------------------------------------------------*/
 /*another function to handle data encoding (string) in the second pass*/
-void encode_string(char *param_line, int data_image[], int *DC)
+void encode_instruction_string(char *param_line, int data_image[], int *DC)
 { 
     char* token = strtok(param_line, "\"");
     token = strtok(NULL, "\"");
@@ -96,8 +28,7 @@ void encode_string(char *param_line, int data_image[], int *DC)
 
 /*----------------------------------------------------------------------------*/
 /*function to encode parameters in code using a switch case*/
-void encode_parameter(codeimage* current, symbol *symbol_table, char* source,
-                     char *dest, externList** extern_list, int IC)
+void encode_data_words(codeimage* current, symbol *symbol_table, char* source, char *dest, externList** extern_list, int IC)
 {
     char* param = source?source:dest;
     int addressing_type = identify_addressing_type(param);
@@ -117,184 +48,174 @@ void encode_parameter(codeimage* current, symbol *symbol_table, char* source,
                 {
                     externList* new = calloc(1, sizeof(externList));
                     strcpy(new->name, param);
-                    new->address = (IC + current->L);
+                    new->address = (IC + current->number_of_words);
                     new->next = *extern_list;
                     *extern_list = new;
                 }
             }
         case immediate:
-            fill_label_or_immediate(current, ARE, address); 
-            break;
-        case direct_register:
-            fill_register_word(current, dest_val, source_val);
+            load_data_word_to_code_image(current, ARE, address); 
             break;
     }
 }
-
-/*----------------------------------------------------------------------------*/
-/*function to insert code image node to code image linked list*/ 
-codeimage* insert_code(codeimage** head)
-{
-    codeimage* new = new_code_image();
-    codeimage* curr = *head;
-    if(*head == NULL)
-    {
-        *head = new;
-    }
-    else
-    {
-        while(curr->next)
-        {
-            curr = curr->next;
-        }
-        curr->next = new;
-    }
-    return new;
-}
-
-/*----------------------------------------------------------------------------*/
-/*function to destroy the code image after we done using it*/
-void free_code_image(codeimage* head)
-{
-    while(head)
-    {
-        codeimage* temp = head;
-        head = head->next;
-        free(temp);
-    }
-}
-
-/*----------------------------------------------------------------------------*/
-/*function to destroy externalList after all extern labels are being written
-to the .ext file*/
-void free_external_list(externList* head)
-{
-    while(head)
-    {
-        externList* temp = head;
-        head = head->next;
-        free(temp);
-    }
-}
-
-
 
 /*----------------------------------------------------------------------------*/
 /*function to encode instruction lines of code and puting them in the codeimage*/
-bool encode_instruction(codeimage** head, symbol *symbol_table, char* line,
-                         int *IC, externList** extern_list)
+bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int *IC, externList** extern_list)
 {
-    char* labeless_line = remove_label(line);
-    if(labeless_line)
+    int opcode_index;
+    char* token;
+    codeimage* current;
+    char *source_param_str;
+    char *dest_param_str = NULL;
+    int source_addressing = 0;
+    int dest_addressing = 0;
+    int reg_source = 0;
+    int reg_dest = 0;
+    int funct;
+    int params_required;
+    int opcode_num;
+    int ARE = absolute; /* value for ARE in command line*/
+
+    /* Remove label from line if it exists */
+    /* and check if the line is empty after removing the label */
+    char* line_to_encode = remove_label(line);
+    if(line_to_encode)
     {
+        /* Gets the opcode and parameters from the line */
+        token = strtok(line_to_encode, " \r\t\n");
 
-        char* jump_check_ptr = strchr(labeless_line, '(');
-        char* token = strtok(labeless_line, " \r\t\n");
-        int opcode = get_opcode(token);
-        int source_addressing, dest_addressing;
-        int param1 = 0;
-        int param2 = 0;
-        char *param1_str = strtok(NULL," ,(\r\t\n");
-        char *param3_str = NULL;
-        char *param2_str = NULL;
-        codeimage* current = insert_code(head);
-        if(param1_str)
+        /* Gets opcode from list of opcodes */
+        opcode_index = get_opcode(token);
+        if (opcode_index == -1) 
         {
-            param2_str = strtok(NULL," ,\r\t\n");
-            source_addressing = identify_addressing_type(param1_str);
-            if(source_addressing == direct)
+            printf("ERROR: %s is not a valid opcode.\n", token);
+            return false;
+        }
+        
+        current = insert_code(head);
+
+        /* Gets data from opcode list */
+        opcode_num = opcodes[opcode_index].opcode_num;
+        params_required = opcodes[opcode_index].params_num;
+        funct = opcodes[opcode_index].funct;
+        
+
+        /* Handle opcode with 2 parameters */
+        if (params_required == 2) 
+        {
+            source_param_str = strtok(NULL, " ,\r\t\n");
+            dest_param_str = strtok(NULL, " ,\r\t\n");
+            if (!source_param_str || !dest_param_str)
             {
-                if(!find_symbol(symbol_table, param1_str))
-                {
-                    printf("ERROR: use of undefined label %s.\n", param1_str);
-                    return false;
-                }
-            }
-            dest_addressing = identify_addressing_type(param2_str);
-            if(dest_addressing == direct)
-            {
-                if(!find_symbol(symbol_table, param2_str))
-                {
-                    printf("ERROR: use of undefined label %s.\n", param2_str);
-                    return false;
-                }
+                printf("ERROR: Missing operands for instruction with 2 operands.\n");
+                return false;
             }
 
-            if(jump_check_ptr)
-            {
-                param3_str = strtok(NULL, " ,)\r\t\n");
-                param1 = dest_addressing;
-                dest_addressing = relative;
-                source_addressing = immediate;
-                param2 = identify_addressing_type(param3_str);
-                if(param2 == direct)
-                {
-                    if(!find_symbol(symbol_table, param3_str))
-                    {
-                        printf("ERROR: use of undefined label %s.\n", param3_str);
-                        return false;
-                    }
-                }
-            }
+            source_addressing = identify_addressing_type(source_param_str);
+            dest_addressing = identify_addressing_type(dest_param_str);
 
-            if(dest_addressing == -1)
+            if (source_addressing == direct && !find_symbol(symbol_table, source_param_str)) 
             {
-                dest_addressing = source_addressing;
-                source_addressing = 0; /*no param1 and 2*/
+                printf("ERROR: Undefined label '%s'\n", source_param_str);
+                return false;
             }
+            if (dest_addressing == direct && !find_symbol(symbol_table, dest_param_str)) {
+                printf("ERROR: Undefined label '%s'\n", dest_param_str);
+                return false;
+            }
+            reg_source = (source_addressing == direct_register) ? atoi(source_param_str + 1) : 0;
+            reg_dest = (dest_addressing == direct_register) ? atoi(dest_param_str + 1) : 0;
         }
 
-        fill_encoded_IC(current,dest_addressing,source_addressing,opcode,param2,param1);
-        if(param1_str)
+        /* Handle opcode with 1 parameter (always will be destination) */
+        else if (params_required == 1) 
         {
-            if(source_addressing == direct_register && dest_addressing == direct_register)
+            dest_param_str = strtok(NULL, " ,\r\t\n");
+            if(!dest_param_str) 
             {
-                encode_parameter(current, symbol_table, param1_str, param2_str, extern_list, *IC);
-                (*IC) += current->L;
-                return true;
+                printf("ERROR: Missing operand for instruction with 1 operand.\n");
+                return false;
             }
-            encode_parameter(current, symbol_table, param1_str, param2_str, extern_list, *IC);
+            dest_addressing = identify_addressing_type(dest_param_str);
+            source_addressing = 0; /* Just destination operand */
+
+            if (dest_addressing == direct && !find_symbol(symbol_table, dest_param_str)) {
+                printf("ERROR: Undefined label '%s'\n", dest_param_str);
+                return false;
+            }
+    
+            reg_dest = (dest_addressing == direct_register) ? atoi(dest_param_str + 1) : 0;
         }
-        if(param2_str)
+
+        /* Handle opcode with 0 parameter (In my assembler, it's will be always rts / stop) */
+        else if(params_required == 0) 
         {
-            if(param1 == direct_register && param2 == direct_register)
+            source_addressing = 0;
+            dest_addressing = 0;
+            reg_source = 0;
+            reg_dest = 0;
+        }
+        else /* Invalid number of parameters - BUG !! */
+        {
+            printf("ERROR: Invalid number of parameters for opcode '%s'.\n", token);
+            return false;
+        }
+
+        /* --------------------------Call encode: -------------------------*/
+        /* Fill the first instruction word  */
+        load_first_word_to_code_image(current, ARE, funct, reg_dest, dest_addressing, reg_source, source_addressing, opcode_num);
+
+        /* ----- Fill parameter words ----- */
+        if (params_required == 2) 
+        {
+            if (source_addressing == direct_register && dest_addressing == direct_register) 
             {
-                encode_parameter(current, symbol_table, param2_str, param3_str, extern_list, *IC);
-                (*IC) += current->L;
-                return true;
+                encode_data_words(current, symbol_table, source_param_str, dest_param_str, extern_list, *IC);
+            } 
+            else 
+            {
+                encode_data_words(current, symbol_table, source_param_str, NULL, extern_list, *IC);
+                encode_data_words(current, symbol_table, NULL, dest_param_str, extern_list, *IC);
             }
-            encode_parameter(current, symbol_table, param2_str, param3_str, extern_list, *IC);
-        }
-        if(param3_str)
+        } 
+        else if (params_required == 1) 
         {
-            encode_parameter(current, symbol_table, NULL, param3_str, extern_list, *IC);
+            encode_data_words(current, symbol_table, NULL, dest_param_str, extern_list, *IC);
         }
-        (*IC) += current->L;
+
+        *IC += current->number_of_words;
     }
+    
     return true;
 }
 
 /*----------------------------------------------------------------------------*/
-/*functiong to simplify use of all other functions and is used as the main
-function to encode line of code*/
-bool encode(codeimage** current, symbol **symbol_table, char* line, int* DC, int* IC,
-             int data_image[], externList** extern_list)
+/* Function to encode a line of assembly code. It handles labels, commands, and data.
+ * It updates the instruction counter - IC and data counter -DC.
+ * The function returns true if the line was successfully encoded, false otherwise.
+ */
+bool encode_line(codeimage** current, symbol **symbol_table, char* line, int* DC, int* IC, int data_image[], externList** extern_list)
 {
     char *word, *token, buffer[MAX_LINE];
     strcpy(buffer, line);
-    /*label handling only if lable exists*/
+
     word = strtok(line, " \r\t\n");
+
     if(!word) /*if word is NULL then line is empty*/
         return true;
+
     if (is_label_end_with_colon(word)) /*0 because line is perfect*/
     {
         token = strchr(word, ':');
         *token = 0;
         token = (*(token + 1) != 0)?token + 1:NULL;
     }
+
+    /* Check if assembly opcode in assembler*/
     if(get_opcode(word) != -1)
     {
-        if(!encode_instruction(current, *symbol_table, buffer ,IC, extern_list))
+        if(!encode_command_line(current, *symbol_table, buffer ,IC, extern_list))
             return false;
     }
 
@@ -303,10 +224,38 @@ bool encode(codeimage** current, symbol **symbol_table, char* line, int* DC, int
         char param_line[MAX_LINE];
         extract_params(buffer, param_line);
         if(is_data(word) == 0)
-            encode_data(param_line, data_image, DC); 
+            encode_instruction_data(param_line, data_image, DC); 
         if(is_data(word) == 1)
-            encode_string(param_line, data_image, DC);
+            encode_instruction_string(param_line, data_image, DC);
 
     }
     return true;
 }
+
+/*----------------------------------------------------------------------------*/
+/*a function to handle and fill encoding for lables or parameters of immediate
+addressing type*/
+void load_data_word_to_code_image(codeimage* current, unsigned ARE, unsigned data)
+{
+    int size = current->number_of_words;
+
+    current->encoded_instruction[size].data_word.ARE = ARE;
+    current->encoded_instruction[size].data_word.data = data;  
+    current->number_of_words++;
+}
+
+/*----------------------------------------------------------------------------*/
+/*a function to fill word for the encoded IC word*/
+void load_first_word_to_code_image(codeimage* current, unsigned ARE, unsigned funct, unsigned register_dest, unsigned addressing_dest, unsigned register_source, unsigned addressing_source, unsigned opcode)
+    {
+        int size = current->number_of_words;
+        
+        current->encoded_instruction[size].first.ARE = ARE;
+        current->encoded_instruction[size].first.funct = funct; 
+        current->encoded_instruction[size].first.register_dest = register_dest;
+        current->encoded_instruction[size].first.addressing_dest = addressing_dest;
+        current->encoded_instruction[size].first.register_source = register_source;
+        current->encoded_instruction[size].first.addressing_source = addressing_source;
+        current->encoded_instruction[size].first.opcode = opcode;        
+        current->number_of_words++;
+    }

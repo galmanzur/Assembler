@@ -7,6 +7,7 @@
 #include "symbol_repo.h"
 #include "parser.h"
 #include "technical_functions.h"
+#include "print_to_console_service.h"
 
 /*----------------------------------------------------------------------------*/
 /*a fucntion to validate a string strats and ends with ", and the charactets

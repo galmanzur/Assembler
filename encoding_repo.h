@@ -9,6 +9,7 @@
 #include "encoding_service.h"
 #include "manager.h"
 #include "enable_bool.h"
+#include "print_to_console_service.h"
 
 /*----------------------------------------------------------------------------*/
 /*function to check machine code overflow in computer memory 100 words of memory

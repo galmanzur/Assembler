@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include "print_to_console_service.h"
 
 /*----------------------------------------------------------------------------*/
 /* function to copy the line to the new buffer and remove the label if present

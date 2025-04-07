@@ -2,6 +2,7 @@
 #define SYMBOL_REPO_H
 
 #include "symbol_defenition.h"
+#include "print_to_console_service.h"
 
 /*----------------------------------------------------------------------------*/
 /*function to free symbol table after we are done using it in the run*/

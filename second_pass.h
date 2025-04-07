@@ -10,8 +10,10 @@
 #include "parser.h"
 #include "encoding_data.h"
 #include "symbol_defenition.h"
+#include "print_to_console_service.h"
 #include "debug.h"
 #include <stdio.h>
+
 
 /*----------------------------------------------------------------------------*/
 /*function to hanlde th second pass in this two pass assembler*/

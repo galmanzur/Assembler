@@ -10,6 +10,7 @@
 #include "file_service.h"
 #include "addressing_service.h"
 #include "process_data.h"
+#include "print_to_console_service.h"
 #include "debug.h"
 #include <stdio.h>
 #include <stdlib.h>

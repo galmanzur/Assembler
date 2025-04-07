@@ -12,6 +12,7 @@
 #include "enable_bool.h"
 #include "manager.h"
 #include "technical_functions.h"
+#include "print_to_console_service.h"
 #include "parser.h"
 
 /* ----------------------------------------------------------------------------*/

@@ -98,7 +98,7 @@ void create_object_file(char* filename, codeimage* current, int DC, int IC, int 
     FILE* object_file = fopen(object_name, "w"); 
 
     /* Display count of instructions and data in the object file */
-    fprintf(object_file, "\t%d\t%d\n", IC - 100, DC);
+    fprintf(object_file, "\t%d\t%d\n", IC - START_VALUE_OF_IC, DC);
 
     /* Write the code image to the object file */
     write_code_image_to_file_in_hexa(current, object_file);

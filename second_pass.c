@@ -51,5 +51,5 @@ bool call_second_pass(char* filename, codeimage** current, symbol **symbol_table
     free(file_to_read);
     fclose(pointer_to_file);
 
-    return true;
+    return is_valid;
 }

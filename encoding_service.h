@@ -12,6 +12,7 @@
 #include "second_pass.h"
 #include "enable_bool.h"
 #include "technical_functions.h"
+#include "print_to_console_service.h"
 
 /* *************************** Function for each line: ***************************  */
 
@@ -30,7 +31,7 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
 
 /*----------------------------------------------------------------------------*/
 /* This function encodes the parameters in the command line. */
-void encode_data_words(codeimage* current, symbol *symbol_table, char* source, char *dest, externList** extern_list, int IC);
+void encode_data_words(codeimage* current, symbol *symbol_table, char* param_source, char *param_dest, externList** extern_list, int IC);
 
 /*----------------------------------------------------------------------------*/
 /*a function to fill word for the encoded IC word*/

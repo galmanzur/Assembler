@@ -1,8 +1,12 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#define ASCII_MAX 127
+#define ASCII_MIN 0
+
 #include "manager.h"
 #include "enable_bool.h"
+#include "print_to_console_service.h"
 
 /*----------------------------------------------------------------------------*/
 /*checking if character is in valid ascii table range from 0 to 127

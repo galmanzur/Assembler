@@ -28,33 +28,84 @@ void encode_instruction_string(char *param_line, int data_image[], int *DC)
 
 /*----------------------------------------------------------------------------*/
 /*function to encode parameters in code using a switch case*/
-void encode_data_words(codeimage* current, symbol *symbol_table, char* source, char *dest, externList** extern_list, int IC)
+void encode_data_words(codeimage* current, symbol *symbol_table, char* param_source, char *param_dest, externList** extern_list, int IC)
 {
-    char* param = source?source:dest;
-    int addressing_type = identify_addressing_type(param);
+    externList* new_external;
+    /* Select the first defined parameter as the one to encode */
+    char* param_to_encode = param_source ? param_source : param_dest;
+
+    int addressing_type = identify_addressing_type(param_to_encode);
+
+    /* Immediate, relative, and direct register encoded with A Flag (left to check if its direct addressing)*/
     int ARE = FLAG_ABSOLUTE;
-    symbol* symbol_place = find_symbol(symbol_table, param); 
-    int source_val = (source)?atoi(source + 1):0;
-    int dest_val = (dest)?atoi(dest + 1):0;
-    int address = (symbol_place)?(symbol_place->address):source_val;
+
+    symbol* found_symbol = find_symbol(symbol_table, param_to_encode); 
+    
+    /* if source and destination are not defined, return 0. and  */
+    int value_to_encode_if_exists = (param_to_encode) ? atoi(param_to_encode + 1) : 0;
+
+    /* if symbol found - its mean direct or relative addressing, return address. If not found symbol its immediate/direct register addressing,
+    so return the value of the number.*/
+    int data_to_encode = (found_symbol) ? ( found_symbol->address) : value_to_encode_if_exists;
+
     switch(addressing_type)
     {
         case ADDRESSING_RELATIVE: 
-        case ADDRESSING_DIRECT:
-            if(symbol_place)
+            if (found_symbol)
             {
-                ARE = (symbol_place->isExternal)?FLAG_EXTERNAL:FLAG_RELOCATABLE;
-                if(address == 0)
+                /* Calculate the distance to the symbol */
+                data_to_encode = found_symbol->address - (IC + current->number_of_words);
+
+                /* In case relative to external */
+                if (found_symbol->isExternal) 
                 {
-                    externList* new = calloc(1, sizeof(externList));
-                    strcpy(new->name, param);
-                    new->address = (IC + current->number_of_words);
-                    new->next = *extern_list;
-                    *extern_list = new;
+                    new_external = calloc(1, sizeof(externList));
+                    strcpy(new_external->name, param_to_encode);
+                    new_external->address = (IC + current->number_of_words);
+                    new_external->next = *extern_list;
+                    *extern_list = new_external;
+                }
+                else
+                {
+                    printf("[Addressing] data to encode: %d, cline: %d\n", data_to_encode, IC);    
+                    load_data_word_to_code_image(current, ARE, data_to_encode);
                 }
             }
+            break;
+
+        case ADDRESSING_DIRECT:
+            if(found_symbol)
+            {
+                /* If the symbol is entry, set ARE to relocatable and if the symbol is external, set ARE to external */
+                ARE = FLAG_RELOCATABLE;
+
+                /* If the symbol is external, add it to the extern list */
+                if(found_symbol->isExternal)
+                {
+                    ARE = FLAG_EXTERNAL;
+                    new_external = calloc(1, sizeof(externList));
+                    strcpy(new_external->name, param_to_encode);
+                    new_external->address = (IC + current->number_of_words);
+                    new_external->next = *extern_list;
+                    *extern_list = new_external;
+                }
+                else
+                {
+                    printf("[Addressing] data to encode: %d, cline: %d\n", data_to_encode, IC);    
+                    /* Load the distance from address of the symbol into the code image */
+                    load_data_word_to_code_image(current, ARE, data_to_encode); 
+                }
+            }
+            break;
+
+            /* If the addressing type is immediate, load the data(number) directly into the code image */
         case ADDRESSING_IMMEDITAE:
-            load_data_word_to_code_image(current, ARE, address); 
+            printf("[Addressing] data to encode: %d, cline: %d\n", data_to_encode, IC);    
+            load_data_word_to_code_image(current, ARE, data_to_encode); 
+            break;
+
+            /* If direct register addressing, so I dont need to add anything to the code image */
+        case ADDRESSING_DIRECT_REGISTER:    
             break;
     }
 }
@@ -80,6 +131,7 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
     /* Remove label from line if it exists */
     /* and check if the line is empty after removing the label */
     char* line_to_encode = remove_label(line);
+
     if(line_to_encode)
     {
         /* Gets the opcode and parameters from the line */
@@ -100,6 +152,7 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
         params_required = opcodes[opcode_index].params_num;
         funct = opcodes[opcode_index].funct;
         
+        printf("[Addressing] opcode: %s, funct: %d, opcode_num: %d, params_required: %d\n", token, funct, opcode_num, params_required);
 
         /* Handle opcode with 2 parameters */
         if (params_required == 2) 
@@ -169,20 +222,17 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
         /* ----- Fill parameter words ----- */
         if (params_required == 2) 
         {
-            if (source_addressing == ADDRESSING_DIRECT_REGISTER && dest_addressing == ADDRESSING_DIRECT_REGISTER) 
-            {
-                encode_data_words(current, symbol_table, source_param_str, dest_param_str, extern_list, *IC);
-            } 
-            else 
-            {
-                encode_data_words(current, symbol_table, source_param_str, NULL, extern_list, *IC);
-                encode_data_words(current, symbol_table, NULL, dest_param_str, extern_list, *IC);
-            }
+            printf("[Addressing] source param: %s, dest param: %s\n", source_param_str, dest_param_str);
+            encode_data_words(current, symbol_table, source_param_str, NULL, extern_list, *IC);
+            printf("[Addressing] dest param: %s\n", dest_param_str);
+            encode_data_words(current, symbol_table, NULL, dest_param_str, extern_list, *IC);
         } 
         else if (params_required == 1) 
         {
+            printf("[Addressing] dest param: %s\n", dest_param_str);
             encode_data_words(current, symbol_table, NULL, dest_param_str, extern_list, *IC);
         }
+            
 
         *IC += current->number_of_words;
     }
@@ -214,6 +264,7 @@ bool encode_line(codeimage** current, symbol **symbol_table, char* line, int* DC
         token = strchr(word, ':');
         *token = 0;
         token = (*(token + 1) != 0) ? token + 1 : NULL;
+        word = strtok(token, " \r\t\n"); /*word is definetly a command*/
     }
 
     /* Check if assembly opcode in assembler*/

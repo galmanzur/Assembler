@@ -3,26 +3,16 @@
 void write_code_image_to_file_in_hexa(codeimage* head, FILE* file_name)
 {
     int i;
-    int IC = 100; /* Starting IC address */
+    int IC = START_VALUE_OF_IC; /* Starting IC address */
 
     while(head)
     {
         for(i = 0; i < head->number_of_words; i++)
         {
             unsigned int word = head->encoded_instruction[i].bit & 0xFFFFFF; /* Mask to 24 bits */
-            fprintf(file_name, "%07d\t%06X\n", IC++, word);
+            fprintf(file_name, "%07d\t%06x\n", IC++, word);
         }
         head = head->next;
-    }
-}
-
-void write_data_image_to_file_in_hexa(int data_image[], int DC, int IC, FILE* file_name)
-{
-    int i;
-    for(i = 0; i < DC; i++)
-    {
-        unsigned int word = data_image[i] & 0xFFFFFF; /* Mask to 24 bits */
-        fprintf(file_name, "%07d\t%06X\n", i + IC, word);
     }
 }
 
@@ -31,7 +21,7 @@ void write_data_image_to_file_in_hexa(int data_image[], int DC, int IC, FILE* fi
 the write object function*/
 void write_code_image_to_file(codeimage* head, FILE* file_name)
 {
-    int i, j, IC = 100;
+    int i, j, IC = START_VALUE_OF_IC;
     while(head)
     {
         for(i = 0; i < head->number_of_words; i++)
@@ -62,5 +52,15 @@ void write_data_image_to_file(int data_image[], int DC, int IC, FILE* file_name)
             fprintf(file_name, "%c", (((data_image[i] >> j) & 1) == 0)?'0':'1');
         }
         fprintf(file_name, "\n");
+    }
+}
+
+void write_data_image_to_file_in_hexa(int data_image[], int DC, int IC, FILE* file_name)
+{
+    int i;
+    for(i = 0; i < DC; i++)
+    {
+        unsigned int word = data_image[i] & 0xFFFFFF; /* Mask to 24 bits */
+        fprintf(file_name, "%07d\t%06X\n", i + IC, word);
     }
 }

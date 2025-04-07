@@ -5,7 +5,7 @@
 getting a char c, return true if ASCII false if not*/
 bool is_ascii(int c) 
 {
-	 return (c >= 0 && c <= 127); /*if char in ascii between 0 and 127*/
+	 return (c >= ASCII_MIN && c <= ASCII_MAX); /*if char in ascii between 0 and 127*/
 }
 
 /*----------------------------------------------------------------------------*/

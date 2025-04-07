@@ -173,19 +173,20 @@ bool validate_space_after_data_or_string(char line[], int cline)
 /* This function checks if .entry or .extern appears after a label in the line. If it is, it prints a warning message and returns false. */
 char validate_entry_extern_after_label(char line[], int cline)
 {
-    char* colon_ptr = strstr(line, ":");
-    if (colon_ptr != NULL)
+    char* token = strstr(line, ":");
+    if (token)
     {
-        colon_ptr++;
-        while (isspace(*colon_ptr))
-            colon_ptr++;
+        /* Skip the label and any spaces after it */
+        token++;
+        while (isspace(*token))
+            token++;
 
-        if (strncmp(colon_ptr, ".extern", 7) == 0)
+        if (strncmp(token, ".extern", 7) == 0)
         {
             printf("WARNING: .extern after label in line %d.\n", cline);
             return false;
         }
-        else if (strncmp(colon_ptr, ".entry", 6) == 0)
+        else if (strncmp(token, ".entry", 6) == 0)
         {
             printf("WARNING: .entry after label in line %d.\n", cline);
             return false;

@@ -39,7 +39,7 @@ bool call_pre_assembler(char *input_file, char *output_file)
         /*if is not macro read file, put lines and check for macros*/
         if (!isMcr) 
         {
-            if (strcmp(word, "mcr") == 0) 
+            if (strcmp(word, START_DEFINE_MACRO_WORD) == 0) 
             {
 
                 isMcr = true;
@@ -83,7 +83,7 @@ bool call_pre_assembler(char *input_file, char *output_file)
         } 
         else 
         {
-            if (strcmp(word, "mcroend") == 0) 
+            if (strcmp(word, END_DEFINE_MACRO_WORD) == 0) 
             {
                 add_macro(&macros_list, macro_lines[0], macro_lines + 1, num_lines - 1);
                 for (j = 0; j < num_lines; j++)

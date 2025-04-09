@@ -11,6 +11,7 @@
 #include "encoding_data.h"
 #include "symbol_defenition.h"
 #include "print_to_console_service.h"
+#include "encoding_data.h"
 #include "debug.h"
 #include <stdio.h>
 

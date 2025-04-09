@@ -1,26 +1,28 @@
 #include "debug.h"
 
-/*function to print symbol table linked list - was used for debugging and can be
-used by task grader for checking correction of symbol table*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function prints the symbol table in a structured format - for debugging or grading.
+ * It takes the head of the symbol table as a parameter. */
 void debug_print_symbol_table(symbol *head)
 {
     symbol *current = head;
+    int index = 0;
 
-    printf("--------------------------------Symbol Table----------------------------------------------------:\n");
-    printf("%-30s %-10s %-10s %-10s %-10s %s\n", "Name", "Address", "External", "Entry", "Data", "Next");
+    printf("\n========================= Symbol Table =========================\n");
+    printf("| %-3s | %-20s | %-7s | %-7s | %-6s | %-7s |\n", "i", "Name", "Address", "External", "Entry", "Data");
+    printf("----------------------------------------------------------------\n");
 
     while (current != NULL)
     {
-        printf("%-30s %-10d %-10s %-10s %-10s %u\n",
-                current->name,
-                current->address,
-                current->isExternal ? "Yes" : "No",
-                current->isEntry ? "Yes" : "No",
-                current->isData ? "Yes" : "No",
-                (unsigned)current->next);
+        printf("| %-3d | %-20s | %-7d | %-7s | %-6s | %-7s |\n",
+               index++,
+               current->name,
+               current->address,
+               current->isExternal ? "Yes" : "No",
+               current->isEntry ? "Yes" : "No",
+               current->isData ? "Yes" : "No");
         current = current->next;
     }
-    printf("-------------------------------------------------------------------------------------------------:\n");
+    printf("================================================================\n");
 }
-
-

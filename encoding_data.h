@@ -1,6 +1,18 @@
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->
+                                               ** Encoding Data 💾 **
+* This file contains the data structures and definitions used for encoding instructions and data in the assembler.
+* It includes the definition of the opcode word, additional data word, and linked list for the code image.
+* It also includes the definition of the extern list used for external labels.									
+ ->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
 #ifndef ENCODING_DATA_H
 #define ENCODING_DATA_H
+
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
 #include "manager.h"
+
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
 /* Usable memory of project's PC: 2 ^ 21 - 100. */
 #define ASSEMBLER_MEMORY_SIZE 2097052
@@ -16,22 +28,23 @@
 
 #define DATA_IMAGE_SIZE 2048
 
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
 extern int data_image[DATA_IMAGE_SIZE];
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
 /*data structues for the E,R,A bits that represents encoding type
  * 4 for the third bit (A) of the ARE field in the instruction word.
  * 2 for the second bit(R) of the ARE field in the instruction word.
  * 1 for the first bit(E) of the ARE field in the instruction word. */
 typedef enum {FLAG_ABSOLUTE = 4, FLAG_RELOCATABLE = 2, FLAG_EXTERNAL = 1} ARE_flag;
-/*----------------------------------------------------------------------------*/
 
-#define SRC 0
-#define DST 1
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
  /* Represents the first word of a machine instruction in the assembler.
  * The first word contains the fields:
- *   ARE: (3 bits)  Indicates the type of reference: Absolute, External, Relocatable.
+ *   ARE: (3 bits)  The type of reference: Absolute, External, Relocatable.
  *   funct: (5 bits)  Optional function code used by some instructions.
  *   register_dest: (3 bits)  Destination register number (r0-r7).
  *   addressing_dest: (2 bits)  Addressing mode of the destination operand.
@@ -84,8 +97,11 @@ typedef struct codeimage
 
 
 /*----------------------------------------------------------------------------*/
-/*a struct used for the .ext file to store IC lines where external lable were 
-used*/
+/* Represents a node in the linked list that holds external labels and their addresses.
+ * Fields:
+ * next: Pointer to the next external label node.
+ * address: Address of the external label in the code image.
+ * name: Name of the external label (up to MAX_LENGTH_LABEL characters). */
 typedef struct externList
 {
 	struct externList *next;

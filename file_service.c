@@ -1,6 +1,8 @@
 #include "file_service.h"
 
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
+/* Initializing the file extensions for the assembler. */
 
 char *extension_file_source = ".as";
 char *extension_file_after_preassembler = ".am";
@@ -8,7 +10,10 @@ char *fentry = ".ent";
 char *fextern = ".ext";
 char *fobject = ".ob";
 
-/*check if file exists with right permissions*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a file is readable. 
+ * It takes the file name as a parameter and returns true if the file is readable, false otherwise. */
 bool is_file_readable(char* filename)
 {
     FILE* file_to_read = fopen(filename, "r");
@@ -21,10 +26,11 @@ bool is_file_readable(char* filename)
     return true;
 }
 
-/*----------------------------------------------------------------------------*/
-/*because the file name arguments are without assembly file .as extension
-this function manipulates the name and adds the extension*/
-char* add_extenstion_to_file(char* filename, char* extension)
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function adds an extension to a file name.
+ * It takes the file name and the extension as parameters and returns the new file name with the extension. */
+char* add_extension_to_file(char* filename, char* extension)
 {
     char* filename_with_extension;
 
@@ -45,12 +51,13 @@ char* add_extenstion_to_file(char* filename, char* extension)
     return filename_with_extension; 
 }
 
-/*----------------------------------------------------------------------------*/
-/*function that writes to file all labels which are entry lables with their 
-coresponding IC address to the .ent file*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function writes the entry labels to a file with their corresponding IC address.
+ * It takes the head of the symbol table and the file name as parameters. */
 void create_entry_file(symbol* head, char* filename) 
 {
-	char* entry_name = add_extenstion_to_file(filename, fentry);
+	char* entry_name = add_extension_to_file(filename, fentry);
 	FILE* file = NULL;
     while (head != NULL) 
     {
@@ -67,12 +74,13 @@ void create_entry_file(symbol* head, char* filename)
     free(entry_name);
 }
 
-/*----------------------------------------------------------------------------*/
-/*function to write to write all extern labels in file with coresponding IC 
-of the lines they were used in*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function writes the external labels and their addresses to a file.
+ * It takes the head of the extern list and the file name as parameters. */
 void create_extern_file(externList* head, char* filename) 
 {
-	char* extern_name = add_extenstion_to_file(filename, fextern);
+	char* extern_name = add_extension_to_file(filename, fextern);
 	FILE* file = NULL;
     while (head != NULL) 
     {
@@ -89,16 +97,18 @@ void create_extern_file(externList* head, char* filename)
     free(extern_name);
 }
 
-/*----------------------------------------------------------------------------*/
-/*function to write the code image and data image to the object file*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function creates an object file with the code image and data image.
+ * It takes the file name, current code image node, data counter (DC), instruction counter (IC), and data image as parameters. */
 void create_object_file(char* filename, codeimage* current, int DC, int IC, int data_image[])
 {
-    char* object_name = add_extenstion_to_file(filename, fobject);
+    char* object_name = add_extension_to_file(filename, fobject);
     /* Open the object file for writing */
     FILE* object_file = fopen(object_name, "w"); 
 
     /* Display count of instructions and data in the object file */
-    fprintf(object_file, "\t%d\t%d\n", IC - START_VALUE_OF_IC, DC);
+    fprintf(object_file, "\t%d %d\n", IC - START_VALUE_OF_IC, DC);
 
     /* Write the code image to the object file */
     write_code_image_to_file_in_hexa(current, object_file);

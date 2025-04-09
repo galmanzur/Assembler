@@ -9,7 +9,7 @@ bool call_second_pass(char* filename, codeimage** current, symbol **symbol_table
     int cline = 0;
     bool is_valid = true;
 
-    char* file_to_read = add_extenstion_to_file(filename, ".am");
+    char* file_to_read = add_extension_to_file(filename, ".am");
 
     char buffer[MAX_LENGTH_LINE], buffer_copy[MAX_LENGTH_LINE];
     FILE* pointer_to_file;
@@ -22,8 +22,8 @@ bool call_second_pass(char* filename, codeimage** current, symbol **symbol_table
     }
 
     pointer_to_file = fopen(file_to_read, "r");
-    (*IC) = 100;
-    (*DC) = 0;
+    (*IC) = START_VALUE_OF_IC;
+    (*DC) = START_VALUE_OF_DC;
 
     while(fgets(buffer, MAX_LENGTH_LINE, pointer_to_file))
     {

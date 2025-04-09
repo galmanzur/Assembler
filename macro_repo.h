@@ -1,3 +1,8 @@
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->
+                                               Macro Repository❕
+* This file contains the definition of a macro repository, which is a data structure that stores macros and their associated code lines.
+* It includes functions to initialize the macro table, add macros, retrieve macros, and free the macro table.
+ ->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 #ifndef MACRO_REPO_H
 #define MACRO_REPO_H
 
@@ -6,7 +11,8 @@
 #include <string.h>
 #include <ctype.h>
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
 /*defining a struct for macro*/
 typedef struct macro
 {
@@ -15,7 +21,8 @@ typedef struct macro
     int num_lines;
 } macro;
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
 /* define a structure for a macros list */
 typedef struct macro_table 
 {
@@ -24,24 +31,27 @@ typedef struct macro_table
     int macro_capacity;
 } macro_table;
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
 /*function to init macro table at the beginning of the spread macto phase*/
 void init_macro_table(macro_table* macros_list);
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
 /*function to add macro to the macro table struct with all the relevant code 
 lines before it is being spread*/
 void add_macro(macro_table *macros_list, char* name, char** lines, int num_lines);
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
 /*function to get macro and its relevant code lines before spreading it to the 
 .am filre for encodeing*/
 macro *get_macro_if_equals(macro_table *macros_list, char *name);
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
 /*function to free and destroy the macro table after it is being used*/
 void free_macro_table(macro_table *macro_list);
 
-void print_macro_table(macro_table *table);
 
 #endif /* MACRO_REPO */

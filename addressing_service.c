@@ -1,8 +1,8 @@
 #include "addressing_service.h"
 
-/*
-Mapping of opcodes to their addressing types for each parameter.
-*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* Mapping of opcodes to their addressing types for each parameter. */
 const opcode_and_addressing_for_each_param opcodes_table[NUMBER_OF_OPCODES] = {
     {&opcodes[0], DENY_ONLY_ADDRESSING_2, ALLOW_ADDRESSING_1_AND_3}, /* mov */
     {&opcodes[1], DENY_ONLY_ADDRESSING_2, DENY_ONLY_ADDRESSING_2}, /* cmp */
@@ -22,30 +22,27 @@ const opcode_and_addressing_for_each_param opcodes_table[NUMBER_OF_OPCODES] = {
     {&opcodes[15], NONE_ADDRESSING_ALLOW, NONE_ADDRESSING_ALLOW} /* stop */
 };
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/* 
-This function checks if the string is a valid immediate addressing type.
-It assumes string starts with a '#' character and checks if the rest of the string is a valid number.
-*/
-bool validate_immediate(char *str, int cline)
+/* This function gets str and current_line and checks immediate adressing validation
+if valid returns true, else return false.*/
+bool validate_immediate(char *str, int current_line)
 {
     if(str)
         str[strcspn(str, "\r\n")] = '\0'; /*remove \r\n from str*/
-    printf("[validate_immediate********]: validate_immediate called with str: %s, cline: %d\n", str, cline);
 	if(!is_legal_number(++str))
 	{
-		printf("ERROR: %s using invalid immediate addressing in line %d.\n", str, cline);
+        print_error(current_line, "Using invalid immediate addressing.");
 		return false;
 	}
 	return true;
 }
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*getting str and cline and checks direcr register adressing validation
-if valid returns true, else return false + indicative error message*/
-bool validate_direct_register(char *str, int cline)
+/* This function gets str and current_line and checks direct register addressing validation 
+If valid returns true, else returns false */
+bool validate_direct_register(char *str, int current_line)
 {
     int i;
     if(str)
@@ -57,28 +54,21 @@ bool validate_direct_register(char *str, int cline)
                 return true;
         }           
     }
-    printf("ERROR: %s is invalid direct register addressing in line %d.\n", str, cline);   
+    print_error(current_line, "Using invalid direct register addressing.");
     return false;
 }
 
-    /*
-	int num = atoi(str+1);
-	if(!((0 <= num) && (num <= 7)))
-	{
-		printf("ERROR: %s is invalid direct register addressing in line %d.\n", str, cline);
-		return false;
-	}
-	return true;*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*----------------------------------------------------------------------------*/
-
-bool validate_relative(char *str, int cline)
+/* This function gets str and current_line and checks relative adressing validation
+if valid returns true, else return false.*/
+bool validate_relative(char *str, int current_line)
 {
     str++;
     if(str)
     {
         str = strtok(str, " \t\n\r"); /*skip spaces*/
-        if(is_label(str, cline))
+        if(is_label(str, current_line))
         {
             return true;
         }        
@@ -86,40 +76,44 @@ bool validate_relative(char *str, int cline)
     return false;
 }
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*checks if addressing is written correctly*/
-bool validate_relevantive_addressing(char *str, int cline, char *line)
+/** This function checks if the addressing type is valid for the given opcode.
+ * It returns true if the addressing type is valid, false otherwise.
+ * It uses the mapper_addressing_types_and_options function to check the addressing type against the allowed options for this opcode.
+ */
+bool validate_addressing_of_opcode(char *opcode_str, int current_line, char *line)
 {
 	 /* Identify the type of addressing */
-     addressing_type_of_opcode type = identify_addressing_type(str);
+     addressing_type_of_opcode type = identify_addressing_type(opcode_str);
  
-     printf("[Addressing] addressing type: %d, cline: %d\n", type, cline);
+     printf("[Addressing] addressing type: %d, current_line: %d\n", type, current_line);
      /* Process the address based on its identified type using a switch statement */
      switch (type) 
      {
         case ADDRESSING_IMMEDITAE:
-             return validate_immediate(str, cline);
+             return validate_immediate(opcode_str, current_line);
 
         case ADDRESSING_DIRECT:
-             return is_label(str, cline);
+             return is_label(opcode_str, current_line);
 
         case ADDRESSING_DIRECT_REGISTER:
-             return validate_direct_register(str, cline);
+             return validate_direct_register(opcode_str, current_line);
 
         case ADDRESSING_RELATIVE:
-            return validate_relative(str, cline);
+            return validate_relative(opcode_str, current_line);
 
         default:
              return false;
      }
 }    
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*function with switch case getting addressing status and 
-addressing type and handel accordingly - will be used in validate addressing
-type*/
+/* This function mapps addressing types to addressing options for a given opcode.
+ * It checks if the addressing type is valid for the given opcode parameter (source or destination).
+ * It returns true if the addressing type is valid, false otherwise.
+ */
 bool mapper_addressing_types_and_options(addressing_option_of_opcode addressing_option, addressing_type_of_opcode addressing_type)
 {
 	/*ook at opcode_table*/
@@ -147,35 +141,38 @@ bool mapper_addressing_types_and_options(addressing_option_of_opcode addressing_
 	return false;
 }
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/* Definitions of enums and structs should be included here or in a header file. */
-/* This function validates the addressing type for a given opcode parameter (source or destination) */
-bool validate_addressing_to_received_opcode_param(int index, char* word, int src_or_dst, int cline)
+/* This function checks if the addressing type is valid for the given opcode parameter (source or destination).
+ * It returns true if the addressing type is valid, false otherwise.
+ * It uses the mapper_addressing_types_and_options function to check the addressing type against the allowed options for this opcode.
+ */
+bool validate_addressing_to_received_opcode_param(int index_opcode, char* word, int is_source_or_dest, int current_line)
 {
-    /* Choose the addressing option based on the src_or_dst flag */
-    /* src_or_dst == 0 for source, 1 for destination */
-    addressing_option_of_opcode addressing_option = (src_or_dst ? 
-                                            opcodes_table[index].destination : 
-                                            opcodes_table[index].source);
+    /* is_source_or_dest == 0 for source, 1 for destination */
+    addressing_option_of_opcode addressing_option = (is_source_or_dest ? opcodes_table[index_opcode].destination : opcodes_table[index_opcode].source);
     
     /* Identify the type of addressing from the given word */
     addressing_type_of_opcode addressing_type = identify_addressing_type(word);
-    printf("Addressing recognized! addressing_type number: %d ,in line %d.\n", addressing_type, cline);
+    printf("Addressing recognized! addressing_type number: %d ,in line %d.\n", addressing_type, current_line);
+
     /* Check if no parameters are expected, return true only if no addressing is required */
-    if (opcodes[index].params_num == 0) {
+    if (opcodes[index_opcode].params_num == 0) 
+    {
         return (addressing_option == NONE_ADDRESSING_ALLOW);
     }
 
-    /* If there is exactly one parameter, always use the destination addressing regardless of src_or_dst */
-    if (opcodes[index].params_num == 1) {
-        addressing_option = opcodes_table[index].destination;
+    /* If there is exactly one parameter, always use the destination */
+    if (opcodes[index_opcode].params_num == 1) 
+    {
+        addressing_option = opcodes_table[index_opcode].destination;
     }
 
     /* Validate if the recognized addressing type matches the allowed options for this opcode */
-    if (!mapper_addressing_types_and_options(addressing_option, addressing_type)) {
+    if (!mapper_addressing_types_and_options(addressing_option, addressing_type)) 
+    {
         /* Print an error message if there is a mismatch */
-        printf("ERROR: Invalid addressing type usage in line %d.\n", cline);
+        print_error(current_line, "Invalid addressing type usage.");
         return false;
     }
 
@@ -183,13 +180,12 @@ bool validate_addressing_to_received_opcode_param(int index, char* word, int src
     return true;
 }
 
-/* 
-Functions - Recognizes the addressing type of a string.
-*/
+/*---------------------------------------------Identify Functions 👀----------------------------------------------                                      */
 
-/*----------------------------------------------------------------------------*/
-/*we assume the parameter we get is with no spacesget addressing type of str
-using above functions*/
+/* This function identifies the addressing type of a given string.
+ * It takes a string as input and returns the corresponding addressing type.
+ * It uses the is_immediate_addressing, is_relative_addressing, and is_direct_register_addressing functions to identify the addressing type.
+ */
 addressing_type_of_opcode identify_addressing_type(char *str)
 {
 	if(!str)
@@ -203,15 +199,19 @@ addressing_type_of_opcode identify_addressing_type(char *str)
 	return ADDRESSING_DIRECT;
 }
 
-/*----------------------------------------------------------------------------*/
-/*checking if str is of immediate addressing type */
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if the string is of type immediate addressing.
+ * It returns true if the string is of type immediate addressing, false otherwise. */
 bool is_immediate_addressing(char *str)
 {
 	return (str[0] == '#');
 }
 
-/*----------------------------------------------------------------------------*/
-/*check if str is of type param_jump addressing*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if the string is of type relative addressing.
+ * It returns true if the string is of type relative addressing, false otherwise. */
 bool is_relative_addressing(char *str)
 {
 	str = strstr(str, "&");
@@ -220,7 +220,10 @@ bool is_relative_addressing(char *str)
 	return true;
 }
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if the string is of type direct register addressing.
+ * It returns true if the string is of type direct register addressing, false otherwise. */
 /*check if str is of type direct_register addressing return true or false depends*/
 bool is_direct_register_addressing(char *str)
 {

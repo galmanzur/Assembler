@@ -1,22 +1,24 @@
 #include "encoding_repo.h"
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*function to check machine code overflow in computer memory 100 words of memory
-are reserver hence machine code of IC + DC can only be 156 memory word*/
+/* This function checks if the code image has overflowed in memory.
+ * It takes the instruction counter (IC) and data counter (DC) as parameters.
+ * It returns true if there is an overflow, false otherwise. */
 bool is_code_overflow(int IC, int DC)
 {
 	if((IC + DC) > ASSEMBLER_MEMORY_SIZE)
 	{
-		printf("ERROR: OVREFLOW! Machine code is greater then 256 memeory words\n");
+		print_global_error("Code image overflow in memory!");
 		return false;
 	}
 	else
 		return true;
 }
 
-/*----------------------------------------------------------------------------*/
-/*a function to created new code image node of the struct for encoding*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function creates a new code image node for encoding. It returns a pointer to the newly created code image node. */
 codeimage* create_code_image()
 {
     /* Allocate memory for the new code image node */
@@ -31,8 +33,10 @@ codeimage* create_code_image()
     return new;
 }
 
-/*----------------------------------------------------------------------------*/
-/*function to insert code image node to code image linked list*/ 
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function inserts a new code image node into the code image linked list.
+ * It takes a pointer to the head of the linked list as a parameter and returns a pointer to the newly inserted code image node. */
 codeimage* insert_code(codeimage** head)
 {
     codeimage* new = create_code_image();
@@ -52,8 +56,10 @@ codeimage* insert_code(codeimage** head)
     return new;
 }
 
-/*----------------------------------------------------------------------------*/
-/*function to destroy the code image after we done using it*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function frees the memory allocated for the code image linked list.
+ * It takes a pointer to the head of the linked list as a parameter. */
 void free_code_image(codeimage* head)
 {
     while(head)
@@ -64,9 +70,10 @@ void free_code_image(codeimage* head)
     }
 }
 
-/*----------------------------------------------------------------------------*/
-/*function to destroy externalList after all extern labels are being written
-to the .ext file*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function frees the memory allocated for the extern list.
+ * It takes a pointer to the head of the extern list as a parameter. */
 void free_extern_list(externList* head)
 {
     while(head)

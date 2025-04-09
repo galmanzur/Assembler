@@ -1,29 +1,27 @@
-/*
-    
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->    
     _                           _     _           
    / \   ___ ___  ___ _ __ ___ | |__ | | ___ _ __ 
   / _ \ / __/ __|/ _ \ '_ ` _ \| '_ \| |/ _ \ '__|
  / ___ \\__ \__ \  __/ | | | | | |_) | |  __/ |   
-/_/   \_\___/___/\___|_| |_| |_|_.__/|_|\___|_|     ©️Gal Manzur  
+/_/   \_\___/___/\___|_| |_| |_|_.__/|_|\___|_|     ©️ By Gal Manzur  
                                                        
 */
-/*Purpose: This is the main file of the assembler program. It is responsible for handling the command line arguments.
+/*This is the main file of the assembler program. 
+    * This assembler takes an assembly language source file as input and generates an object file, entry file, and extern file.
+    * The assembler contains of three main stages - calls each stage if the previous successfully completed:
+        1. Pre-Assembler stage: handles macros and expands them in the source file
+        2. First pass stage: handles the assembly language syntax and fills the symbol table
+        3. Second pass stage: handles the assembly language syntax and fills the code image and data image:
+                * write entry file: writes the entry file if there are any entries in the symbol table 
+                * write extern file: writes the extern file with the external labels and their addresses
+                * write object file: writes the object file with the code image and data image 
+        ** And obviously frees all memory used in the assembler */
 
- This is  assembler that takes an assembly language source file as input and generates an object file, entry file, and extern file.
-    * The assembler consists of three main stages - calls each stage if the previous successfully completed:
-            * 1. Pre-Assembler stage: handles macros and expands them in the source file
-            * 2. First pass stage: handles the assembly language syntax and fills the symbol table
-            * 3. Second pass stage: handles the assembly language syntax and fills the code image and data image:
-                * 1. write entry file: writes the entry file if there are any entries in the symbol table 
-                * 2. write extern file: writes the extern file with the external labels and their addresses
-                * 3. write object file: writes the object file with the code image and data image 
-            Then- free all memory used in the assembler
-        
-        checking if file is readable and if it is call pre-assembler function
-        If the file is not readable, prints error message and exit*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
 #include "main.h"
 
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
 /*main function that use all other function of assembler to create our two pass
 assembler*/
@@ -32,33 +30,31 @@ int main(int argc, char *argv[])
     int IC;
     int DC;
     int i;                         
-    char *source_file, *file_after_preassembler; /*stores the file name, spreaded file name*/
-    int data_image[DATA_IMAGE_SIZE] = {0}; /*data image buffer*/
-    codeimage* code_table;  
-    symbol* symbol_table;         
-    externList* extern_list; 
+    char *source_file, *file_after_preassembler; /* stores the file name, spreaded file name*/
+    int data_image[DATA_IMAGE_SIZE] = {0}; /* data image buffer */
+    codeimage* code_table = NULL; 
+    symbol* symbol_table = NULL; 
+    externList* extern_list = NULL; 
 
     if (argc == 1)
     {
-        /* if no file name is given as argument, print error message*/
+        /* if no file name is given as argument, print error message */
         print_global_error("No file name as an input.");
     }
 
-    /*for loop to treat each file given as argument in the assembler manner*/
+    /* For each file name given as argument */
     for (i = 1; i < argc; i++)
     {    
-        /*printing the file name given as argument*/
+        /* Print the name of the file being processed */
         print_process_file(argv[i]);
 
+        /* Initialize the instruction counter (IC) and data counter (DC) */
         IC = START_VALUE_OF_IC; 
         DC = START_VALUE_OF_DC; 
-        code_table = NULL;  
-        symbol_table = NULL;         
-        extern_list = NULL; 
     
         /* Preparing files to assembler - assumes the user provided file without extension */
-        source_file = add_extenstion_to_file(argv[i], extension_file_source); /*changing name to name of file by adding file extension*/
-        file_after_preassembler = add_extenstion_to_file(argv[i], extension_file_after_preassembler);/*changing name to name of file by adding file extension*/
+        source_file = add_extension_to_file(argv[i], extension_file_source); /*changing name to name of file by adding file extension*/
+        file_after_preassembler = add_extension_to_file(argv[i], extension_file_after_preassembler);/*changing name to name of file by adding file extension*/
 
         if(is_file_readable(source_file))
         {

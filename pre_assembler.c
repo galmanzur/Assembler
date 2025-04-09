@@ -100,7 +100,7 @@ bool call_pre_assembler(char *input_file, char *output_file)
                 strcpy(macro_lines[num_lines++], line);
             }
         }
-        print_macro_table(&macros_list);
+
     }
 
     /*closing files*/
@@ -109,44 +109,3 @@ bool call_pre_assembler(char *input_file, char *output_file)
     free_macro_table(&macros_list);
     return is_complete_successfully;
 }
-
-/*
-void validate_macro_definition(FILE *src_file, macro_table *macros_list, char *word, int current_line) 
-{
-    if (!word || is_safe_word(word)) 
-    {
-        fprintf(stderr, "ERROR: \"%s\" in line %d is reserved word, cannot be macro name.\n", word, current_line);
-        return;
-    }
-}
-
-void spread_out_macro(FILE *dst_file, macro_table *macros_list, char *word, char *line) 
-{
-    macro *current_macro;
-    int i;
-    current_macro = get_macro(macros_list, word);
-    if (current_macro != NULL) 
-    {
-        for (i = 0; i < current_macro->num_lines; i++) 
-        {
-            fprintf(dst_file, "%s", current_macro->lines[i]);
-        }
-    } 
-    else 
-    {
-        fprintf(dst_file, "%s", line);
-    }
-}
-
-void save_macro(macro_table *macros_list, char **macro_lines, int num_lines) 
-{
-    int j;
-    if (!macro_lines || num_lines == 0) return;
-    
-    add_macro(macros_list, macro_lines[0], macro_lines + 1, num_lines - 1);
-    
-    for (j = 0; j < num_lines; j++)
-        free(macro_lines[j]);
-    
-    free(macro_lines);
-}*/

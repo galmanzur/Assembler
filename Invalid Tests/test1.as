@@ -5,7 +5,7 @@ LOOP: prn #48
 lea W, r6
 inc r6
 mov r3, K
-sub r1, r7
+sub r1, r4
 bne END
 cmp K, #-6
 bne &END

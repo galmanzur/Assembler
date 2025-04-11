@@ -1,8 +1,16 @@
 #include "manager.h"
 
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* The 8 registers r0-r7 of the CPU */
 const char *registers[NUMBER_OF_REGISTERS] = {"r0","r1","r2","r3","r4","r5","r6","r7"};
 
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This list contains the names of the directives used in the assembler. */
 const char *directives_str[NUMBER_OF_DIRECTIVES] = {".data", ".string", ".entry", ".extern"};
+
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
 /* The opcodes of the assembler. Each opcode has a name, an opcode number, a function code, and the number of parameters it takes. */
 const opcode opcodes[NUMBER_OF_OPCODES] = {{"mov", 0, 0, 2}, {"cmp", 1, 0, 2}, {"add", 2, 1, 2}, 

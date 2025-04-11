@@ -1,6 +1,10 @@
 #include "pre_assembler.h"
 /*----------------------------------------------------------------------------*/
 
+/* This function calls the pre-assembler process. 
+ * It takes the input file name and output file name as parameters.
+ * It processes the output am file and expands macros.
+ * It returns true if the pre-assembly was successful, false otherwise. */
 bool call_pre_assembler(char *input_file, char *output_file) 
 {
     int i, j;

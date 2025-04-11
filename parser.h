@@ -1,74 +1,90 @@
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->
+                                             Parser👁️‍🗨️
+This file contains functions for parsing assembly code.
+It includes functions to identify and validare labels, opcodes, addressing types and more.
+It is used to validate the syntax of assembly code and ensure that it follows the correct format.
+ ->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 #ifndef PARSER_H
 #define PARSER_H
 
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
 #define ASCII_MAX 127
 #define ASCII_MIN 0
+
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
 #include "manager.h"
 #include "enable_bool.h"
 #include "print_to_console_service.h"
 
-/*----------------------------------------------------------------------------*/
-/*checking if character is in valid ascii table range from 0 to 127
-getting a char c, return true if ASCII false if not*/
-bool is_ascii(int c);
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*----------------------------------------------------------------------------*/
-/*function to check if number is a whole number gets a str of number and cline
-for error handling*/
-bool is_legal_number(char *str);
+/* This function checks if a character is an ASCII character.
+ It takes an integer as a parameter and returns true if the character is ASCII, false otherwise. */
+bool is_ascii(int number);
 
-/*----------------------------------------------------------------------------*/
-/*checking if word is opcodes return index in list if it is else return -1*/
-int get_opcode(char *word);
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*----------------------------------------------------------------------------*/
-/*checking if word is insruction return index in list if it is else return -1*/
-directive_type get_directive_in_line(char *word);
+/* This function checks if a number is a legal number.
+    Legal number is one of the following: X, +X, -X. (In order the instructions. )
+    It takes a string as a parameter and returns true if the number is legal, false otherwise. */
+bool is_legal_number(char *number_str);
 
-/*----------------------------------------------------------------------------*/
-/*chekcing if word is opcode or instruction*/
-bool is_command(char *word);
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*----------------------------------------------------------------------------*/
-/*function to check if the word is a safe word if it is return true
-else if name is saved word in assembly language return false*/
+/* This function checks if a string is an opcode.
+ It takes a string as a parameter and returns the index of the opcode in the opcode list if it is valid, -1 otherwise. */
+int get_opcode(char *opcode_str);
+
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a string is a directive.
+ It takes a string as a parameter and returns the index of the directive in the directive list if it is valid, -1 otherwise. */
+directive_type get_directive_in_line(char *directive_str);
+
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a string is a command.
+ It takes a string as a parameter and returns true if the string is a command, false otherwise. */
+bool is_command(char *command_str);
+
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a word is a safe word.
+ It takes a string as a parameter and returns true if the word is a safe (already exists in assmembler syntex) word, false otherwise. */
 bool is_safe_word(char *word);
 
-/*----------------------------------------------------------------------------*/
-/*function to check if line is blank or comment line*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a line is blank or a comment.
+ It takes a string as a parameter and returns true if the line is blank or a comment, false otherwise. */
 bool is_blank_or_comment(char* line);
 
-/*----------------------------------------------------------------------------*/
-/*checking if label is ended in : if it is return true else use cline for indicative 
-error*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a label ends with a colon.
+ It takes a string as a parameter and returns true if the label ends with a colon, false otherwise. */
 bool is_label_end_with_colon(char *label);
 
-/*----------------------------------------------------------------------------*/
-/*assuming opcode correct get line and check if starts with comma*/
-bool is_start_with_coma(char *line, int cline);
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*----------------------------------------------------------------------------*/
-/*assuming opcode correct get line and check if ends with comma*/
-bool is_end_with_coma(char *line, int cline);
+/* This function checks if a string is a register in the assembler.
+ It takes a string as a parameter and returns true if the string is a register, false otherwise. */
+bool is_register_in_assembler(char *register_str);
 
-/*----------------------------------------------------------------------------*/
-/*function to count number of commas in line*/
-int how_much_commas(char* line);
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*----------------------------------------------------------------------------*/
-/*function to check if word is register*/
-bool is_register_in_assembler(char *word);
+/* This function checks if a string is a label.
+ It takes a string and the current line number as parameters and returns true if the string is a label, false otherwise. */
+bool is_label(char *label_str, int current_line);
 
-/*----------------------------------------------------------------------------*/
-/*checking if label is safe if it is return true else false + indicative error
-message to user*/
-bool is_label(char *word, int cline);
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*----------------------------------------------------------------------------*/
-/* this function checks if a line of assembly code is valid
- based on the format: opcode param1 , param 2
- there can be any number of spaces between opcode, params, and comma.*/
-bool valid_line_comma_spaces(char* line, int cline);
+/* This function checks if a line is valid based on the format: opcode param1 , param 2
+ It takes a string and the current line number as parameters.*/
+bool valid_line_comma_spaces(char* line, int current_line);
+
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
 #endif /* PARSER_H */

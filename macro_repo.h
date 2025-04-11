@@ -13,7 +13,7 @@
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*defining a struct for macro*/
+/* This structure represents a macro, which contains of a name and an array of code lines. */
 typedef struct macro
 {
     char* name;
@@ -23,7 +23,8 @@ typedef struct macro
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/* define a structure for a macros list */
+/* This structure represents a macro table, which contains an array of macros,
+ the number of macros, and the capacity of the macro table. */
 typedef struct macro_table 
 {
     macro **macros;
@@ -33,25 +34,27 @@ typedef struct macro_table
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*function to init macro table at the beginning of the spread macto phase*/
+/* This function creates a new macro table with the specified initial capacity. */
 void init_macro_table(macro_table* macros_list);
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*function to add macro to the macro table struct with all the relevant code 
-lines before it is being spread*/
+/* This function adds a new macro to the macro table.
+ It takes a pointer to the macro table, the name of the macro, an array of code lines, and the number of lines as parameters. */
 void add_macro(macro_table *macros_list, char* name, char** lines, int num_lines);
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*function to get macro and its relevant code lines before spreading it to the 
-.am filre for encodeing*/
+/* This function retrieves a macro from the macro table by its name.
+ It takes a pointer to the macro table and the name of the macro as parameters. */
 macro *get_macro_if_equals(macro_table *macros_list, char *name);
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*function to free and destroy the macro table after it is being used*/
+/* This function frees the memory allocated for the macro table.
+ It takes a pointer to the macro table as a parameter. */
 void free_macro_table(macro_table *macro_list);
 
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
 #endif /* MACRO_REPO */

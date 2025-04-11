@@ -1,6 +1,8 @@
 #include "macro_repo.h"
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function creates a new macro table with the specified initial capacity. */
 void init_macro_table(macro_table* macros_list)
 {
     int i; /* iterator for the loop */
@@ -14,28 +16,29 @@ void init_macro_table(macro_table* macros_list)
     macros_list->macro_capacity = initial_capacity; /* Set the initial capacity */
 }
 
-/*----------------------------------------------------------------------------*/
-/* a fucntion to add a macro to macro list using memory allocations and strcpy of
-needed fields, checks for memory availability aswell*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function adds a new macro to the macro table.
+ It takes a pointer to the macro table, the name of the macro, an array of code lines, and the number of lines as parameters. */
 void add_macro(macro_table *macros_list, char* name, char** lines, int num_lines) 
 {
     int i = 0; /* iterator for the loop */
     macro* new_macro = malloc(sizeof(macro));
     if(!new_macro)
     {
-        printf("CRITICAL: memory problem at add_macro\n");
+        print_global_error("Memory problem at add_macro");
         exit(EXIT_FAILURE);
     }
 
     if(!(new_macro->name = malloc(strlen(name) + 1)))
     {
-        printf("CRITICAL: memory problem at add_macro\n");
+        print_global_error("Memory problem at add_macro");
         exit(EXIT_FAILURE);
     }
 
     if(!(new_macro->lines = malloc(num_lines * sizeof(char*))))
     {
-        printf("CRITICAL: memory problem at add_macro\n");
+        print_global_error("Memory problem at add_macro");
         exit(EXIT_FAILURE);
     }
 
@@ -65,8 +68,10 @@ void add_macro(macro_table *macros_list, char* name, char** lines, int num_lines
     macros_list->num_macros++;
 }
 
-/*----------------------------------------------------------------------------*/
-/*function to get the macro from macro list*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function retrieves a macro from the macro table by its name.
+ It takes a pointer to the macro table and the name of the macro as parameters. */
 macro *get_macro_if_equals(macro_table *macros_list, char *name) 
 {
     int i;
@@ -92,8 +97,10 @@ macro *get_macro_if_equals(macro_table *macros_list, char *name)
     return NULL;
 }
 
-/*----------------------------------------------------------------------------*/
-/*a function to destroy table*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function frees the memory allocated for the macro table.
+ It takes a pointer to the macro table as a parameter. */
 void free_macro_table(macro_table *macro_list)
 {
     int i, j;

@@ -150,7 +150,6 @@ bool process_line(char* line, int cline, symbol** symbol_table, int *IC, int *DC
 
     line = strtok(line, "\r\n"); /* remove new line characters */
     /* DEBUG: Print the incoming line */
-    printf("DEBUG: [handle_symbol_in_line] line %d => '%s'\n", cline, line);
 
     /* Copy the line to local buffers for different parsing needs */
     strcpy(buffer,line);

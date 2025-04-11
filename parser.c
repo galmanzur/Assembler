@@ -1,110 +1,110 @@
 #include "parser.h"
 
-/*----------------------------------------------------------------------------*/
-/*checking if character is in valid ascii table range from 0 to 127
-getting a char c, return true if ASCII false if not*/
-bool is_ascii(int c) 
+/* This function checks if a character is an ASCII character.
+ * It takes an integer as a parameter and returns true if the character is ASCII, false otherwise. */
+bool is_ascii(int number) 
 {
-	 return (c >= ASCII_MIN && c <= ASCII_MAX); /*if char in ascii between 0 and 127*/
+	 return (number >= ASCII_MIN && number <= ASCII_MAX); /*if char in ascii between 0 and 127*/
 }
 
-/*----------------------------------------------------------------------------*/
-/*function to check if number is a whole number gets a str of number and cline
-for error handling*/
-bool is_legal_number(char *str)
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a number is a legal number.
+    Legal number is one of the following: X, +X, -X. (In order the instructions. )
+    It takes a string as a parameter and returns true if the number is legal, false otherwise. */
+bool is_legal_number(char *number_str)
 {
-	printf("[is_legal_number]: is_legal_number called with str: %s\n", str);
-    if (str == NULL)
-    	return false;
-    if(*str == '\0')
+	/* Null check */
+    if (number_str == NULL)
     	return false;
 
-	if(str)
+	/*check if the string is empty*/	
+    if(*number_str == '\0')
+    	return false;
+
+	number_str = number_str + strspn(number_str, " \t\n\r"); /*skip spaces*/
+
+	/* +X, -X, is legal*/
+	if (*number_str == '+' || *number_str == '-')
+		number_str++;
+
+	/* Check if the remain characters are digits - Loop through the string until we reach the end or a space character */
+	while (*number_str != '\0' && *number_str != ' ' && *number_str != '\t' && *number_str != '\n' && *number_str != '\r')
 	{
-		str = str + strspn(str, " \t\n\r"); /*skip spaces*/
-
-		printf("[is_legal_number]: checking first char: %c\n", *str);	
-		/*check for sign - optional*/
-		if (*str == '+' || *str == '-')
-			str++;
-	
-		/*check if the remaining characters are digits*/
-		while (*str != '\0' && *str != ' ' && *str != '\t' && *str != '\n' && *str != '\r')
-		{
-			printf("[is_legal_number]: checking char: %c\n", *str);
-			if (!isdigit(*str))
-			{
-				printf("[is_legal_number]: is_legal_number returned false\n");
-				return false;
-			}
-			str++;
-		}
-		printf("[is_legal_number]: is_legal_number returned true\n");
+		if (!isdigit(*number_str))
+			return false; /*if not digit return false*/
+		number_str++;
+	}
 		
-	}
-	else
-	{
-		printf("[is_legal_number]: str is NULL\n");
-		return false;
-	}
 	return true;
-	
 }
 
-/*----------------------------------------------------------------------------*/
-/*checking if word is opcodes return index in list if it is else return -1*/
-int get_opcode(char *word)
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a string is an opcode.
+ It takes a string as a parameter and returns the index of the opcode in the opcode list if it is valid, -1 otherwise. */
+int get_opcode(char *opcode_str)
 {
 	int i;
-	if(!word)
+	if(!opcode_str)
 		return -1; 
     /*comparing if name is one conatianed in saved opcodes */
     for (i = 0; i < NUMBER_OF_OPCODES; i++)
-        if (strcmp(word, opcodes[i].name) == 0) 
+        if (strcmp(opcode_str, opcodes[i].name) == 0) 
             return i;
     return -1;
 }
 
-/*----------------------------------------------------------------------------*/
-/* This functuin checks if word is directive return index in enum list if it is else return -1*/
-directive_type get_directive_in_line(char *word)
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a string is a directive.
+ It takes a string as a parameter and returns the index of the directive in the directive list if it is valid, -1 otherwise. */
+directive_type get_directive_in_line(char *directive_str)
 {
 	int i;
 
     for (i = 0; i < NUMBER_OF_DIRECTIVES; i++) 
-        if (strcmp(word, directives_str[i]) == 0) 
+        if (strcmp(directive_str, directives_str[i]) == 0) 
             return i;
     return -1; 	
 }
 
-/*----------------------------------------------------------------------------*/
-/*chekcing if word is opcode or instruction*/
-bool is_command(char *word)
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a string is a command.
+ It takes a string as a parameter and returns true if the string is a command, false otherwise. */
+bool is_command(char *command_str)
 {
-	return (get_opcode(word) != -1) || (get_directive_in_line(word)  != -1);
+	return (get_opcode(command_str) != -1) || (get_directive_in_line(command_str)  != -1);
 }
 
-/*----------------------------------------------------------------------------*/
-/*function to check if word is computer register*/
-bool is_register_in_assembler(char *word)
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a string is a register in the assembler.
+ It takes a string as a parameter and returns true if the string is a register, false otherwise. */
+bool is_register_in_assembler(char *register_str)
 {
 	int i;
+	/*comparing if name is one of the saved registers */
 	for (i = 0; i < NUMBER_OF_REGISTERS; i++) 
-    if (strcmp(word, registers[i]) == 0) 
-        return true;
-    return false;
+		if (strcmp(register_str, registers[i]) == 0) 
+			return true;
+	return false;
 }
 
-/*----------------------------------------------------------------------------*/
-/*function to check if the word is a safe word if it is return true
-else if name is saved word in assembly language return false*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a word is a safe word.
+ It takes a string as a parameter and returns true if the word is a safe (already exists in assmembler syntex) word, false otherwise. */
 bool is_safe_word(char *word)
 {
 	return (is_command(word) || is_register_in_assembler(word));
 }
 
-/*----------------------------------------------------------------------------*/
-/*function to check if line is blank or comment line*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a line is blank or a comment.
+ It takes a string as a parameter and returns true if the line is blank or a comment, false otherwise. */
 bool is_blank_or_comment(char* line)
 {
 	char buffer[MAX_LENGTH_LINE], *word;
@@ -117,9 +117,10 @@ bool is_blank_or_comment(char* line)
 	return false;
 }
 
-/*----------------------------------------------------------------------------*/
-/*checking if label is ended in : if it is return true else use cline for indicative 
-error*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a label ends with a colon.
+ It takes a string as a parameter and returns true if the label ends with a colon, false otherwise. */
 bool is_label_end_with_colon(char *label)
 {
     if (label) 
@@ -131,139 +132,55 @@ bool is_label_end_with_colon(char *label)
     return false;
 }
 
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*----------------------------------------------------------------------------*/
-/*assuming opcode correct get line and check if starts with comma*/
-bool is_start_with_coma(char *line, int cline)
-{
-	while(isspace(*line++));
 
-	if (*line == ',')
-	{
-		printf("ERROR: comma before parameters in line %d\n", cline);
-		return true;
-	}
-	return false;
-}
-
-/*----------------------------------------------------------------------------*/
-/*assuming opcode correct get line and check if ends with comma*/
-bool is_end_with_coma(char *line, int cline)
-{
-	int i = strlen(line) - 1; 
-	while (isspace(line[i]))
-		i--;
-	if (line[i] == ',')
-	{
-		printf("ERROR: comma at the end of line %d\n", cline);
-		return true;
-	}
-	return false;
-}
-
-/*----------------------------------------------------------------------------*/
-/*function to count number of commas in line*/
-int how_much_commas(char* line)
-{
-	int i, counter_comma = 0;
-	if(line == NULL)
-		return -1;
-	for (i = 0; line[i]; i++)
-		if(line[i] == ',')
-			counter_comma++;
-	return counter_comma;
-}
-
-bool is_label(char *word, int cline)
+/* This function checks if a string is a label.
+ It takes a string and the current line number as parameters and returns true if the string is a label, false otherwise. */
+bool is_label(char *label_str, int current_line)
 {
 	int length, i;
-	word = strtok(word, " \t\r\n"); /*skip spaces*/
+	label_str = strtok(label_str, " \t\r\n"); /*skip spaces*/
 
-	if(!word) 
-	{
-		printf("Label is NULL in line %d\n", cline);
+	if(!label_str) 
 		return false;
-	}
-    length = strlen(word); /*length of word*/
-	if(length == 0) /*if word is empty*/
-	{
-		printf("Label is empty in line %d\n", cline);
+
+    length = strlen(label_str); /*length of label_str*/
+
+	if(length == 0) /*if label_str is empty*/
 		return false;
-	}
 
 	if(length > MAX_LENGTH_LABEL) /*checking if label name is in range*/ 
 	{
-		printf("ERROR: Label '%s' at line %d is longer than %d characters. \n", word, cline, MAX_LENGTH_LABEL);
+		print_error(current_line, "Label name is too long.");
 		return false;
 	}	
-	if (!isalpha(word[0])) /*checking first character in label name is alphabetical*/
+	if (!isalpha(label_str[0])) /*checking first character in label name is alphabetical*/
 	{
-		printf("ERROR: The first character of label '%s' at line %d doesnt alphabetical. \n", word, cline);
+		print_error(current_line, "Label name must start with an alphabetical character.");
 		return false;
 	}
-	if(is_safe_word(word)) /*checking if word is safe*/		
+	if(is_safe_word(label_str)) /*checking if word safe*/		
 	{
-		printf("ERROR: Reserved word '%s' used in label at line %d\n", word, cline);
+		print_error(current_line, "Label name is a reserved word.");
 		return false;
 	}
 	for (i = 0; i < length; i++) /*checking if label name is in ascii range*/
 	{
-		if (!isalpha(word[i]) && !isdigit(word[i]))
+		if (!isalpha(label_str[i]) && !isdigit(label_str[i]))
 		{
-			printf("ERROR: Label '%s' at line %d contains invalid characters(alpha characters or digits). \n", word, cline);
+			print_error(current_line, "Label name contains invalid characters.");
 			return false;
 		}
 	}
 	return true;
 }
 
-/*checking if word to represent label is safe if it is return true else false + indecative error
-message to user*/
-bool is_safe_label(char *word, int cline)
-{
-	int i;
-    int length = strlen(word);
-    if (length > 0)
-    {
-    	if(length <= MAX_LENGTH_LABEL)
-    	{
-       		if (isalpha(word[0])) /*checking first character in label name is alphabetical*/
-       		{
-       		    for (i = 1; i < length; i++) /*checking if all characters are alpahnumerical*/
-       		    {
-       		        if (!isalnum(word[i]))
-       		        {
-       		            printf("ERROR: Invalid character in label '%s' at line %d\n", word, cline);
-       		            return false;
-       		        }
-       		    }
-       		    if (!is_safe_word(word))
-       		        return true;
-       		    else
-       		    {
-       		        printf("ERROR: Reserved word '%s' used as a label at line %d\n", word, cline);
-       		        return false;
-       		    }
-       		}
-       		else
-       		{
-       		    printf("ERROR: Label '%s' at line %d does not start with an alphabetical character\n", word, cline);
-       		    return false;
-       		}
-   		}
-		else
-		{
-		    printf("ERROR: Label '%s' at line %d is longer than %d characters\n", word, cline, MAX_LENGTH_LABEL);
-		    return false;
-		}
-	}
-	return true;
-}
-/*----------------------------------------------------------------------------*/
-/* this function checks if a line of assembly code is valid
- based on the format: opcode param1 , param 2
- there can be any number of spaces between opcode, params, and comma.*/
- bool valid_line_comma_spaces(char* line, int cline)
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if a line is valid based on the format: opcode param1 , param 2
+ It takes a string and the current line number as parameters.*/
+ bool valid_line_comma_spaces(char* line, int current_line)
  {
 	 char* ptr = line;
 	 bool comma_flag = false;
@@ -274,7 +191,7 @@ bool is_safe_label(char *word, int cline)
 		 {
 			 if (comma_flag == false)
 			 {
-				 printf("ERROR: invalid comma or spaces in line %d.\n", cline);
+				 print_error(current_line, "Invalid comma placement in line.");
 				 return false;
 			 }
 			 comma_flag = false;

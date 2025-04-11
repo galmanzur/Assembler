@@ -23,8 +23,9 @@
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*main function that use all other function of assembler to create our two pass
-assembler*/
+/* This is the main function of the assembler program.
+ It takes command line arguments for input file names, processes each file, and generates the output files.
+ Calls the pre-assembler, first pass, and second pass functions. */
 int main(int argc, char *argv[])
 {
     int IC;

@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
     int i;                         
     char *source_file, *file_after_preassembler; /* stores the file name, spreaded file name*/
     int data_image[DATA_IMAGE_SIZE] = {0}; /* data image buffer */
+    bool is_first_pass_success = false;
     codeimage* code_table = NULL; 
     symbol* symbol_table = NULL; 
     externList* extern_list = NULL; 
@@ -65,7 +66,8 @@ int main(int argc, char *argv[])
                 if(call_first_pass(&symbol_table, file_after_preassembler, &IC, &DC)) /*first pass stage*/
                 {
                     print_success("First pass completed.");
-                    if(call_second_pass(argv[i], &code_table, &symbol_table, &DC, &IC, data_image, &extern_list)) /*second pass stage*/
+                    is_first_pass_success = true;
+                    if(call_second_pass(argv[i], &code_table, &symbol_table, &DC, &IC, data_image, &extern_list, is_first_pass_success)) /*second pass stage*/
                     {
                         print_success("Second pass completed.");
 
@@ -75,10 +77,18 @@ int main(int argc, char *argv[])
                         print_global_error("Second pass stage failed.");
                 }
                 else
-                    print_global_error("First pass stage failed.");
+                {
+                    /* Display errors if there are more */
+                    call_second_pass(argv[i], &code_table, &symbol_table, &DC, &IC, data_image, &extern_list, is_first_pass_success);
+                }              
             }
             else
-                print_global_error("Pre-Assembler stage failed.");
+            {
+                /* Display errors if there are more */
+                call_first_pass(&symbol_table, file_after_preassembler, &IC, &DC);
+                call_second_pass(argv[i], &code_table, &symbol_table, &DC, &IC, data_image, &extern_list, is_first_pass_success);
+            }
+                
         }
         
         /* Freeing all memory used in the assembler */

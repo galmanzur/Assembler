@@ -7,10 +7,10 @@
  * It takes the file name, head code image node, symbol table, instruction counter (IC), data counter (DC), data image array, and extern list as parameters.
  * It returns true if the second pass was successful, false otherwise. */
 bool call_second_pass(char* filename, codeimage** code_image, symbol **symbol_table,
-    int* DC, int* IC, int data_image[], externList** extern_list)
+    int* DC, int* IC, int data_image[], externList** extern_list, bool is_first_pass_success)
 {
     int current_line = 0;
-    bool is_valid = true;
+    bool is_valid = is_first_pass_success;
 
     char* file_to_read = add_extension_to_file(filename, ".am");
 
@@ -39,7 +39,7 @@ bool call_second_pass(char* filename, codeimage** code_image, symbol **symbol_ta
             continue;
         else
         {   
-            if(!encode_line(code_image, symbol_table, buffer_copy, DC, IC, data_image, extern_list, current_line))
+            if(!encode_line(code_image, symbol_table, buffer_copy, DC, IC, data_image, extern_list, current_line, is_first_pass_success))
                 is_valid = false;          
         }
     }

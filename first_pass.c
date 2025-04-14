@@ -53,10 +53,14 @@ bool validate_all_in_line(char* line, int current_line, int *DC,  symbol** symbo
     char* word_to_validate;
     char* token;
     int index_opcode;
+    int number_of_params_allowed = 0;
+    char* opcode_name;
+    
     char line_copy[MAX_LENGTH_LINE]; 
     char line_copy_for_validate_space[MAX_LENGTH_LINE];
     char line_copy_for_validate_addressing[MAX_LENGTH_LINE];
     char label_name[MAX_LENGTH_LABEL];
+    char buffer_for_first_param[MAX_LENGTH_LINE];
     char* first_param, *second_param, *additional_param;
     label_name[0] = '\0';
 
@@ -75,72 +79,103 @@ bool validate_all_in_line(char* line, int current_line, int *DC,  symbol** symbo
         if (!is_label(word_to_validate, current_line))
             return false;
 
+        do_warning_if_entry_or_extern_after_label(line_copy, current_line);
+
         strcpy(label_name, word_to_validate);
 
         token = (*(token + 1) != 0) ? token + 1 : NULL;
-        /*word_to_validate = strtok(token, " \r\t\n");*/
     }
 
-    /* Check if the line is a command */
-    if (is_command(word_to_validate))
-    {
-        int count_received_params = 0;
-        /* copy parameters in line*/
-        char new_buffer[MAX_LENGTH_LINE];
-        extract_params(buffer, new_buffer);
-        extract_params(buffer, line_copy_for_validate_addressing);
-        
-        /* opcode handling */
-        if ((index_opcode = get_opcode(word_to_validate)) != -1)
-        {
-            /* Validate line comma and spaces */
-            if (!is_legal_commas_in_instruction(buffer, current_line))
-                return false;
-           
-            /* Validate source operand */
-            first_param = strtok(new_buffer, " ,\t\n");
-            second_param = strtok(NULL, " \t\n");
-            additional_param = strtok(NULL, " \t\n");
+    extract_params(buffer, buffer_for_first_param);
 
-            printf("first param %s, second %s, third %s", first_param, second_param, additional_param);
-            /* Validate destination operand, 0 means that there is it the source parameter */
-            if (validate_addressing_to_received_opcode_param(index_opcode, first_param, 0, current_line))
+    extract_params(buffer, line_copy_for_validate_addressing);
+
+    opcode_name = strtok(word_to_validate, " ,\t\n");
+    /* opcode handling */
+    if ((index_opcode = get_opcode(opcode_name)) != -1)
+    {
+        /* Validate line comma and spaces */
+        if (!is_legal_commas_in_instruction(buffer, current_line))
+            return false;
+            
+        number_of_params_allowed = opcodes[index_opcode].params_num;
+
+        first_param = strtok(buffer_for_first_param, " ,\t\n");
+        second_param = strtok(NULL, " \t\n");
+        additional_param = strtok(NULL, " \t\n");
+
+        if(additional_param)
+        {
+            print_error(current_line, "Too many parameters received in instruction.");
+            return false;
+        }
+
+        if(first_param != NULL && second_param == NULL)  
+        {
+            if(number_of_params_allowed != 1)
             {
-                if(first_param)
+                print_error(current_line, "Invalid number of parameters received in instruction.");
+                return false;
+            }
+
+            else
+            {
+                /* Validate destination operand, 0 means that there is it the source parameter */
+                if (validate_addressing_to_received_opcode_param(index_opcode, first_param, 1, current_line))
                 {
-                    count_received_params++;
+                    /* Validate destination operand */
+                    if (!validate_addressing_of_opcode(first_param, current_line, line_copy_for_validate_addressing))                
+                        return false;
+
+                }
+            }    
+        }
+        else if(first_param != NULL && second_param != NULL) 
+        {
+            if(number_of_params_allowed != 2)
+            {
+                print_error(current_line, "Invalid number of parameters received in instruction.");
+                return false;
+            }
+                
+            else
+            {
+                /* Validate destination operand, 0 means that there is it the source parameter */
+                if (validate_addressing_to_received_opcode_param(index_opcode, first_param, 0, current_line))
+                {
                     /* Validate source operand */
                     if (!validate_addressing_of_opcode(first_param, current_line, line_copy_for_validate_addressing))                
                         return false;
-                }   
-            }
-
-            /* Validate destination operand, 1 means that there is it the dest parameter */
-            if (validate_addressing_to_received_opcode_param(index_opcode, second_param, 1, current_line))
-            {
-                if(second_param)  
+                }
+    
+                /* Validate destination operand, 1 means that there is it the dest parameter */
+                if (validate_addressing_to_received_opcode_param(index_opcode, second_param, 1, current_line))
                 {
-                    count_received_params++;
                     /* Validate destination operand */
                     if (!validate_addressing_of_opcode(second_param, current_line, line_copy_for_validate_addressing))
                         return false;
-                    while(strtok(NULL, " \t\n") !=NULL)
-                    count_received_params++;
                 }
-            }
-            if(count_received_params >= 3)
-            {
-                print_error(current_line, "Too many parameters received in instruction.");
-                return false;
-            }   
+            }    
         }
+        else
+        {
+            if(number_of_params_allowed != 0)
+            {
+                print_error(current_line, "Invalid number of parameters received in instruction.");   
+                return false;
+            }
+        }
+
+        return true;
+
     }
 
-    else if(!validate_space_after_data_or_string(line_copy_for_validate_space, current_line))
-        return false;
+    
+    else if(validate_space_after_data_or_string(line_copy_for_validate_space, current_line))
+        return true;    
 
     /* Finish to validate the line */
-    return true;
+    return false;
 }
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/

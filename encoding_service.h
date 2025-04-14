@@ -31,7 +31,7 @@ My drawing of the encoding of each word - The code is built according to the dra
 /* This function encodes the line and calling the other help functions, then - puts it in the code image.
  It takes the current code image node, symbol table, line, instruction counter (IC), data counter (DC), and extern list as parameters.
  It returns true if the encoding was successful, false otherwise. */
-bool encode_line(codeimage** current, symbol **symbol_table, char* line, int* DC, int* IC, int data_image[], externList** extern_list, int current_line);
+bool encode_line(codeimage** current, symbol **symbol_table, char* line, int* DC, int* IC, int data_image[], externList** extern_list, int current_line, bool is_first_pass_success);
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 

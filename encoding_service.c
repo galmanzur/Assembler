@@ -5,7 +5,8 @@
 /* This function encodes the line and calling the other help functions, then - puts it in the code image.
  It takes the current code image node, symbol table, line, instruction counter (IC), data counter (DC), and extern list as parameters.
  It returns true if the encoding was successful, false otherwise. */
- bool encode_line(codeimage** current, symbol **symbol_table, char* line, int* DC, int* IC, int data_image[], externList** extern_list, int current_line)
+ bool encode_line(codeimage** current, symbol **symbol_table, char* line, int* DC, int* IC, int data_image[], externList** extern_list, 
+    int current_line, bool is_first_pass_success)
  {
      char *word, *token, buffer[MAX_LENGTH_LINE];
      directive_type index_directive_type;
@@ -32,7 +33,11 @@
      {
          if(!encode_command_line(current, *symbol_table, buffer ,IC, extern_list, current_line))
              return false;
-     }    
+     }
+
+     /* All syntax assembler checks so we dont need to continiuo*/
+     if(!is_first_pass_success)    
+        return false;
  
      else if(index_directive_type == DIRECTIVE_STRING || index_directive_type == DIRECTIVE_DATA ) /*because data and string are the first two in array*/
      {
@@ -199,10 +204,7 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
         /* Gets opcode from list of opcodes */
         opcode_index = get_opcode(token);
         if (opcode_index == -1) 
-        {
-            print_error_with_arg(current_line, "Invalid opcode", token, "in command line.");
             return false;
-        }
         
         current = insert_code(head);
 
@@ -217,10 +219,7 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
             source_param_str = strtok(NULL, " ,\r\t\n");
             dest_param_str = strtok(NULL, " ,\r\t\n");
             if (!source_param_str || !dest_param_str)
-            {
-                print_error(current_line, "Missing operands for instruction with 2 operands.");
                 return false;
-            }
 
             source_addressing = identify_addressing_type(source_param_str);
             dest_addressing = identify_addressing_type(dest_param_str);
@@ -246,10 +245,8 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
         {
             dest_param_str = strtok(NULL, " ,\r\t\n");
             if(!dest_param_str) 
-            {
-                print_error_with_arg(current_line, "Missing operand for instruction", opcodes[opcode_index].name, "which need to get 1 operand.");
                 return false;
-            }
+
             dest_addressing = identify_addressing_type(dest_param_str);
             source_addressing = 0; /* Just destination operand */
 

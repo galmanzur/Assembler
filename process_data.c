@@ -19,20 +19,20 @@ int handle_string_directive_statement(char *str, int current_line, int *DC)
     for(j = strlen(str) - 1; isspace(str[j]) && j >= i ; j--); 
     if (str[i] != '\"')
     {
-        print_error(current_line, "invalid string, does not start with \"");
+        print_error(current_line, "Invalid string, does not start with \"");
         return -1;
     }
     for (i++; str[i] != '\"' && str[i] != '\0'; i++)
     {
         if (!is_ascii(str[i]))
         {
-            print_error(current_line, "invalid string, not all characters are ASCII.");
+            print_error(current_line, "Invalid string, not all characters are ASCII.");
             return -1;
         }
     }
     if (str[j] != '\"')
     {
-        print_error(current_line, "invalid string, does not end with \".");
+        print_error(current_line, "Invalid string, does not end with \".");
         return -1;
     }
 
@@ -74,7 +74,7 @@ int handle_data_directive_statement(char* line, int current_line, int *DC)
             {
                 if (!isdigit(token[i]) && !isspace(token[i]) && token[i] != '+' && token[i] != '-')
                 {
-                    print_error(current_line, "invalid character in data parameter.");
+                    print_error(current_line, "Invalid character in data parameter.");
                     return -1;
                 }
             }
@@ -85,14 +85,14 @@ int handle_data_directive_statement(char* line, int current_line, int *DC)
     /* check for invalid number of tokens */
     if (num_tokens == 0)
     {
-        print_error(current_line, "no tokens in data parameter.");
+        print_error(current_line, "No parameters in data directive.");
         return -1;
     }
 
     /* check for invalid number of numbers */
     if (num_numbers == 0)
     {
-        print_error(current_line, "no numbers in data parameter.");
+        print_error(current_line, "No numbers in data directive.");
         return -1;
     }
 
@@ -111,7 +111,7 @@ int handle_data_directive_statement(char* line, int current_line, int *DC)
 
             if (*token == '\0')
             {
-                print_error(current_line, "invalid comma placement in data parameter.");
+                print_error(current_line, "Invalid comma placement in data directive.");
                 return -1;
             }
         }
@@ -119,7 +119,7 @@ int handle_data_directive_statement(char* line, int current_line, int *DC)
     }
     if (num_commas != num_tokens - 1)
     {
-        print_error(current_line, "invalid comma placement in data parameter.");
+        print_error(current_line, "Invalid comma placement in data directive.");
         return -1;
     }
     (*DC) += num_numbers;

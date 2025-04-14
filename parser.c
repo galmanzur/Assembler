@@ -186,35 +186,57 @@ bool is_label(char *label_str, int current_line)
  It takes a string and the current line number as parameters.*/
  bool is_legal_commas_in_instruction(char* line, int current_line)
  {
-	 char* ptr = line;
-	 bool comma_flag = false;
- 
-	 while (*ptr != '\0') 
-	 {
-		 if (*ptr == ',') 
-		 {
-			 if (comma_flag == false)
-			 {
-				 print_error(current_line, "Invalid comma placement in line.");
-				 return false;
-			 }
-			 comma_flag = false;
-		 } 
-		 else if (isspace(*ptr)) 
-		 {
-			 /* Ignore multiple spaces */
-			 while (isspace(*ptr))
-				 ptr++;
-			 /* If there's no comma after multiple spaces, set flag to false */
-			 if (*ptr != ',' && *ptr != '\0')
-				 comma_flag = false;
-		 } 
-		 else 
-		 {
-			 comma_flag = true;
-		 }
-		 ptr++;
-	 }
-	 return true;
+    char* line_to_validate = line;
+    bool comma_allowed = false;
+
+    while (*line_to_validate != '\0')
+    {
+        if (*line_to_validate == ',')
+        {
+            if (!comma_allowed)
+            {
+                print_error(current_line, "Comma appears before operand or multiple commas.");
+                return false;
+            }
+
+            comma_allowed = false;
+        }
+        else if (!isspace(*line_to_validate))
+        {
+            comma_allowed = true;
+        }
+
+        line_to_validate++;
+    }
+
+    if (*(line_to_validate - 1) == ',')
+    {
+        print_error(current_line, "Invalid comma at the end of line.");
+        return false;
+    }
+
+    return true;
  }
+
+
+/* This function checks if there is a label before .entry or .extern and prints warning if there is. */
+void do_warning_if_entry_or_extern_after_label(char* line, int current_line)
+{
+    char* after_label = strstr(line, ":");
+    if (after_label)
+    {
+        after_label++;
+        while (isspace(*after_label))
+			after_label++;
+
+        if (strncmp(after_label, ".extern", 7) == 0)
+			print_warning(current_line, ".extern after label in line. ");
+
+        else if (strncmp(after_label, ".entry", 6) == 0)
+			print_warning(current_line, ".entry after label in line. ");
+
+    }
+}
+
+
 

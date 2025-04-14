@@ -30,7 +30,7 @@
  * It takes the file name, current code image node, symbol table, instruction counter (IC), data counter (DC), data image array, and extern list as parameters.
  * It returns true if the second pass was successful, false otherwise. */
 bool call_second_pass(char* filename, codeimage** current, symbol **symbol_table,
-    int* DC, int* IC, int data_image[], externList** extern_list);
+    int* DC, int* IC, int data_image[], externList** extern_list, bool is_first_pass_success);
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 

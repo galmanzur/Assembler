@@ -88,4 +88,7 @@ bool is_legal_commas_in_instruction(char* line, int current_line);
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
+/* This function checks if there is a label before .entry or .extern and prints warning if there is. */
+void do_warning_if_entry_or_extern_after_label(char* line, int current_line);
+
 #endif /* PARSER_H */

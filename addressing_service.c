@@ -154,18 +154,6 @@ bool validate_addressing_to_received_opcode_param(int index_opcode, char* word, 
     /* Identify the type of addressing from the given word */
     addressing_type_of_opcode addressing_type = identify_addressing_type(word);
 
-    /* Check if no parameters are expected, return true only if no addressing is required */
-    if (opcodes[index_opcode].params_num == 0) 
-    {
-        return (addressing_option == NONE_ADDRESSING_ALLOW);
-    }
-
-    /* If there is exactly one parameter, always use the destination */
-    if (opcodes[index_opcode].params_num == 1) 
-    {
-        addressing_option = opcodes_table[index_opcode].destination;
-    }
-
     /* Validate if the recognized addressing type matches the allowed options for this opcode */
     if (!mapper_addressing_types_and_options(addressing_option, addressing_type)) 
     {

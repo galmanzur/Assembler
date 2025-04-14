@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 
     if (argc == 1)
     {
-        /* if no file name is given as argument, print error message */
+        /* If no file name is given as argument, print error message */
         print_global_error("No file name as an input.");
     }
 
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
                 print_global_error("Pre-Assembler stage failed.");
         }
         
-        /*freeing all memory used in the assembler*/
+        /* Freeing all memory used in the assembler */
         free_symbol_table(symbol_table);
         free_code_image(code_table);
         free_extern_list(extern_list); 

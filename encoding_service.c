@@ -5,7 +5,7 @@
 /* This function encodes the line and calling the other help functions, then - puts it in the code image.
  It takes the current code image node, symbol table, line, instruction counter (IC), data counter (DC), and extern list as parameters.
  It returns true if the encoding was successful, false otherwise. */
- bool encode_line(codeimage** current, symbol **symbol_table, char* line, int* DC, int* IC, int data_image[], externList** extern_list)
+ bool encode_line(codeimage** current, symbol **symbol_table, char* line, int* DC, int* IC, int data_image[], externList** extern_list, int current_line)
  {
      char *word, *token, buffer[MAX_LENGTH_LINE];
      directive_type index_directive_type;
@@ -16,8 +16,6 @@
  
      if(!word) /*if word is NULL then line is empty*/
          return true;
- 
-     
     
      if (is_label_end_with_colon(word)) /*0 because line is perfect*/
      {
@@ -32,7 +30,7 @@
      /* Check if assembly opcode in assembler*/
      if(get_opcode(word) != -1)
      {
-         if(!encode_command_line(current, *symbol_table, buffer ,IC, extern_list))
+         if(!encode_command_line(current, *symbol_table, buffer ,IC, extern_list, current_line))
              return false;
      }    
  
@@ -172,7 +170,7 @@ void encode_data_words(codeimage* current, symbol *symbol_table, char* param_sou
 /* This function encodes the command line and puts it in the code image.
  It takes the head of the code image linked list, symbol table, line, instruction counter (IC), and extern list as parameters.
  It returns true if the encoding was successful, false otherwise. */
-bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int *IC, externList** extern_list)
+bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int *IC, externList** extern_list, int current_line)
 {
     int opcode_index;
     char* token;
@@ -202,7 +200,7 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
         opcode_index = get_opcode(token);
         if (opcode_index == -1) 
         {
-            print_global_error("Invalid opcode in command line.");
+            print_error_with_arg(current_line, "Invalid opcode", token, "in command line.");
             return false;
         }
         
@@ -220,7 +218,7 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
             dest_param_str = strtok(NULL, " ,\r\t\n");
             if (!source_param_str || !dest_param_str)
             {
-                print_global_error("Missing operands for instruction with 2 operands.");
+                print_error(current_line, "Missing operands for instruction with 2 operands.");
                 return false;
             }
 
@@ -229,11 +227,12 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
 
             if (source_addressing == ADDRESSING_DIRECT && !find_symbol(symbol_table, source_param_str)) 
             {
-                print_global_error("Label is not defined in the symbol table.");
+                print_error_with_arg(current_line, "Label", source_param_str, "is not defined.");
                 return false;
             }
-            if (dest_addressing == ADDRESSING_DIRECT && !find_symbol(symbol_table, dest_param_str)) {
-                print_global_error("Label is not defined in the symbol table.");
+            if (dest_addressing == ADDRESSING_DIRECT && !find_symbol(symbol_table, dest_param_str)) 
+            {
+                print_error_with_arg(current_line, "Label", dest_param_str, "is not defined.");
                 return false;
             }
 
@@ -248,14 +247,15 @@ bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int
             dest_param_str = strtok(NULL, " ,\r\t\n");
             if(!dest_param_str) 
             {
-                print_global_error("Missing operand for instruction with 1 operand.");
+                print_error_with_arg(current_line, "Missing operand for instruction", opcodes[opcode_index].name, "which need to get 1 operand.");
                 return false;
             }
             dest_addressing = identify_addressing_type(dest_param_str);
             source_addressing = 0; /* Just destination operand */
 
-            if (dest_addressing == ADDRESSING_DIRECT && !find_symbol(symbol_table, dest_param_str)) {
-                print_global_error("In encoding: Undefined label");
+            if (dest_addressing == ADDRESSING_DIRECT && !find_symbol(symbol_table, dest_param_str)) 
+            {
+                print_error_with_arg(current_line, "Label", dest_param_str, "is not defined.");
                 return false;
             }
     

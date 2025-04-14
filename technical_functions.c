@@ -1,17 +1,9 @@
 #include "technical_functions.h"
 
-/*assuming line is not destroyed
-void copy_param_line(char buffer[], char new_buffer[])
-{
-	char *token, index;
-	strcpy(new_buffer, buffer);
-	token = strtok(new_buffer," \t\n");
-	if(new_buffer[strlen(new_buffer)-1] == ':')
-		token = strtok(NULL, " \t\n"); 
-	token = token + strlen(token); 
-	index = token - new_buffer;
-	strcpy(new_buffer, buffer + index);
-}*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function extracts the parameters from a line of code and stores them in a new buffer.
+* It takes the original line, the current line number, and the new buffer as parameters. */
 void extract_params(char buffer[], char new_buffer[])
  {
 	char *token, index;
@@ -24,9 +16,10 @@ void extract_params(char buffer[], char new_buffer[])
 	strcpy(new_buffer, buffer + index);
 }
 
-/*----------------------------------------------------------------------------*/
-/*a function to take full line of code and retur it without the lable in the 
-beginning if label is present, else returns line as is.*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function removes the label from a line of code if present.
+* It takes the line as a parameter and returns the line without the label. */
 char* remove_label(char* line)
 {
     char* ptr = strchr(line, ':');
@@ -36,15 +29,3 @@ char* remove_label(char* line)
         line++;
     return line;
 }
-
-
-/*function that get index and return the number of parameters
-int param_number(int index)
-{
-	int counter = 0;
-	if(opcodes_table[index].source != NONE)
-		counter++;
-	if(opcodes_table[index].destination != NONE)
-		counter++;
-	return counter;
-}*/

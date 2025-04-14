@@ -1,7 +1,7 @@
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->
                                                  Encoding Service 📜
-This file contain the functions of encoding the assembler instructions and data into Code image and Data image.
-The functions include encoding the line, command line, data words, and loading the words of the instruction into the code image.
+* This file contain the functions of encoding the assembler instructions and data into Code image and Data image.
+* The functions include encoding the line, command line, data words, and loading the words of the instruction into the code image.
 
 ** Notice: 📑🖼️ 
 You can see in "Important Documents" --> "Drawing of Encode Words.pdf" of this project:
@@ -31,14 +31,14 @@ My drawing of the encoding of each word - The code is built according to the dra
 /* This function encodes the line and calling the other help functions, then - puts it in the code image.
  It takes the current code image node, symbol table, line, instruction counter (IC), data counter (DC), and extern list as parameters.
  It returns true if the encoding was successful, false otherwise. */
-bool encode_line(codeimage** current, symbol **symbol_table, char* line, int* DC, int* IC, int data_image[], externList** extern_list);
+bool encode_line(codeimage** current, symbol **symbol_table, char* line, int* DC, int* IC, int data_image[], externList** extern_list, int current_line);
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
 /* This function encodes the command line and puts it in the code image.
  It takes the head of the code image linked list, symbol table, line, instruction counter (IC), and extern list as parameters.
  It returns true if the encoding was successful, false otherwise. */
-bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int *IC, externList** extern_list);
+bool encode_command_line(codeimage** head, symbol *symbol_table, char* line, int *IC, externList** extern_list, int current_line);
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 

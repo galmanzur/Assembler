@@ -1,12 +1,15 @@
 #include "second_pass.h"
 
-/*----------------------------------------------------------------------------*/
-/*function that used the above function, encodes and validates the code if
-all validation passed in first and second pass*/
-bool call_second_pass(char* filename, codeimage** current, symbol **symbol_table,
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function is responsible for the second pass of the assembler. 
+ * It processes the assembly code, encodes the instructions and data, and generates the final object file.
+ * It takes the file name, head code image node, symbol table, instruction counter (IC), data counter (DC), data image array, and extern list as parameters.
+ * It returns true if the second pass was successful, false otherwise. */
+bool call_second_pass(char* filename, codeimage** code_image, symbol **symbol_table,
     int* DC, int* IC, int data_image[], externList** extern_list)
 {
-    int cline = 0;
+    int current_line = 0;
     bool is_valid = true;
 
     char* file_to_read = add_extension_to_file(filename, ".am");
@@ -16,7 +19,7 @@ bool call_second_pass(char* filename, codeimage** current, symbol **symbol_table
 
     if(!is_file_readable(file_to_read))
     {
-        printf("ERROR: File %s is not readable.\n", file_to_read);
+        print_global_error("File is not readable.");
         free(file_to_read);
         return false;
     }
@@ -27,7 +30,7 @@ bool call_second_pass(char* filename, codeimage** current, symbol **symbol_table
 
     while(fgets(buffer, MAX_LENGTH_LINE, pointer_to_file))
     {
-        cline++;
+        current_line++;
         /* Copy the line to line copy */
         strcpy(buffer_copy, buffer);
         
@@ -36,15 +39,14 @@ bool call_second_pass(char* filename, codeimage** current, symbol **symbol_table
             continue;
         else
         {   
-            printf("DEBUG: Processing line %d => %s\n", cline, buffer_copy);
-            if(!encode_line(current, symbol_table, buffer_copy, DC, IC, data_image, extern_list))
+            if(!encode_line(code_image, symbol_table, buffer_copy, DC, IC, data_image, extern_list, current_line))
                 is_valid = false;          
         }
     }
         if(is_valid)
         {
             create_entry_file(*symbol_table, filename);
-            create_object_file(filename, *current, *DC, *IC, data_image);
+            create_object_file(filename, *code_image, *DC, *IC, data_image);
             create_extern_file(*extern_list, filename);
         }
 

@@ -25,7 +25,7 @@ codeimage* create_code_image()
     codeimage* new = calloc(1, sizeof(codeimage));
     if(!new)
     {
-        printf("CRITICAL: memory problem!\n");
+        print_global_error("In allocate memory.");
         exit(EXIT_FAILURE);
     }
     /* Initialize the new words - number of instructions in the code image*/

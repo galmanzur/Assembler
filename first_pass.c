@@ -25,11 +25,13 @@ bool call_first_pass(symbol** symbol_table, char *filename, int *IC, int *DC)
         else
         {
             process_line(buffer_copy, current_line, symbol_table, IC, DC);
-            debug_print_symbol_table(*symbol_table);
+
+            /* You can remove comment for debug with symbol table 📑✔️*/
+            /*debug_print_symbol_table(*symbol_table);*/
         }
     }
     sync_IC_of_data_symbol(*symbol_table, *IC);
-    if(is_there_duplicate_symbol(*symbol_table))
+    if(is_there_duplicate_symbol(*symbol_table, current_line))
         is_valid = false;
     if(is_valid == false)
     {
@@ -55,6 +57,7 @@ bool validate_all_in_line(char* line, int current_line, int *DC,  symbol** symbo
     char line_copy_for_validate_space[MAX_LENGTH_LINE];
     char line_copy_for_validate_addressing[MAX_LENGTH_LINE];
     char label_name[MAX_LENGTH_LABEL];
+    char* first_param, *second_param, *additional_param;
     label_name[0] = '\0';
 
     line = strtok(line, "\r\n"); /* remove new line characters */
@@ -77,33 +80,35 @@ bool validate_all_in_line(char* line, int current_line, int *DC,  symbol** symbo
         token = (*(token + 1) != 0) ? token + 1 : NULL;
         /*word_to_validate = strtok(token, " \r\t\n");*/
     }
+
     /* Check if the line is a command */
-    if (word_to_validate && is_command(word_to_validate))
+    if (is_command(word_to_validate))
     {
-        int count_tokens = 0;
+        int count_received_params = 0;
         /* copy parameters in line*/
         char new_buffer[MAX_LENGTH_LINE];
         extract_params(buffer, new_buffer);
         extract_params(buffer, line_copy_for_validate_addressing);
-
+        
         /* opcode handling */
         if ((index_opcode = get_opcode(word_to_validate)) != -1)
         {
-            char* first_param, *second_param;
             /* Validate line comma and spaces */
-            if (!valid_line_comma_spaces(buffer, current_line))
+            if (!is_legal_commas_in_instruction(buffer, current_line))
                 return false;
-
+           
             /* Validate source operand */
             first_param = strtok(new_buffer, " ,\t\n");
             second_param = strtok(NULL, " \t\n");
+            additional_param = strtok(NULL, " \t\n");
 
+            printf("first param %s, second %s, third %s", first_param, second_param, additional_param);
             /* Validate destination operand, 0 means that there is it the source parameter */
             if (validate_addressing_to_received_opcode_param(index_opcode, first_param, 0, current_line))
             {
                 if(first_param)
                 {
-                    count_tokens++;
+                    count_received_params++;
                     /* Validate source operand */
                     if (!validate_addressing_of_opcode(first_param, current_line, line_copy_for_validate_addressing))                
                         return false;
@@ -115,17 +120,17 @@ bool validate_all_in_line(char* line, int current_line, int *DC,  symbol** symbo
             {
                 if(second_param)  
                 {
-                    count_tokens++;
+                    count_received_params++;
                     /* Validate destination operand */
                     if (!validate_addressing_of_opcode(second_param, current_line, line_copy_for_validate_addressing))
                         return false;
                     while(strtok(NULL, " \t\n") !=NULL)
-                        count_tokens++;
+                    count_received_params++;
                 }
             }
-            if(count_tokens >= 3)
+            if(count_received_params >= 3)
             {
-                print_error(current_line, "Too many tokens in line.");
+                print_error(current_line, "Too many parameters received in instruction.");
                 return false;
             }   
         }

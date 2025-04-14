@@ -1,7 +1,7 @@
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->
                                                  File Service 📂📑💻
-This file contains functions to handle file operations in the assembler.
-It includes functions to check if a file is readable, add extensions to file names, and create entry, extern, and object files.
+* This file contains functions to handle file operations in the assembler.
+* It includes functions to check if a file is readable, add extensions to file names, and create entry, extern, and object files.
  ->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
 #ifndef FILE_SERVICE_H

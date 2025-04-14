@@ -87,7 +87,6 @@ bool validate_addressing_of_opcode(char *opcode_str, int current_line, char *lin
 	 /* Identify the type of addressing */
      addressing_type_of_opcode type = identify_addressing_type(opcode_str);
  
-     printf("[Addressing] addressing type: %d, current_line: %d\n", type, current_line);
      /* Process the address based on its identified type using a switch statement */
      switch (type) 
      {
@@ -154,7 +153,6 @@ bool validate_addressing_to_received_opcode_param(int index_opcode, char* word, 
     
     /* Identify the type of addressing from the given word */
     addressing_type_of_opcode addressing_type = identify_addressing_type(word);
-    printf("Addressing recognized! addressing_type number: %d ,in line %d.\n", addressing_type, current_line);
 
     /* Check if no parameters are expected, return true only if no addressing is required */
     if (opcodes[index_opcode].params_num == 0) 

@@ -1,5 +1,6 @@
 #include "pre_assembler.h"
-/*----------------------------------------------------------------------------*/
+
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
 /* This function calls the pre-assembler process. 
  * It takes the input file name and output file name as parameters.
@@ -8,46 +9,51 @@
 bool call_pre_assembler(char *input_file, char *output_file) 
 {
     int i, j;
-    int cline = 0;
-    FILE *src_file;
-    FILE *dst_file;
-    macro_table macros_list;
+    int current_line = 0;
+    FILE *source_file;
+    FILE *destination_file;
+    macro_table macro_table;
     char line[MAX_LENGTH_LINE];
-    bool isMcr = false; /* is macro flag */
+    
+    /* Kind of flag */
+    bool is_process_macro = false; 
+
     int num_lines = 0;
     char **macro_lines = NULL;
     char *word;
-    char line_copy[MAX_LENGTH_LINE]; /* line copy before strtok */
-    macro *curr_macro;
+    char line_copy[MAX_LENGTH_LINE]; 
+    macro *current_macro_to_process;
     bool is_complete_successfully = true;
 
-    src_file = fopen(input_file, "r");
-    dst_file = fopen(output_file, "w");
+    /* Open the files */
+    source_file = fopen(input_file, "r");
+    destination_file = fopen(output_file, "w");
 
-    init_macro_table(&macros_list); /* init macro list */
+    /* Creates a new macro table */
+    init_macro_table(&macro_table); /* init macro_table */
 
-    /* while loop to replace and get macros */
-    while (fgets(line, sizeof(line), src_file))
+    /* Replace and get macros */
+    while (fgets(line, sizeof(line), source_file))
     {
-        cline++;
+        current_line++;
         strcpy(line_copy, line);
         word = strtok(line_copy, " \t\r\n"); /* get first word */
       
         if (!word) {
-            fprintf(dst_file, "%s", line); /* Keep the line in the output file */
+            fprintf(destination_file, "%s", line); /* keep the line in the output file, there no need to do anything */
             continue;
         }
 
-        word[strcspn(word, "\r\n")] = '\0';
+        word[strcspn(word, "\r\t\n")] = '\0';
 
         /*if is not macro read file, put lines and check for macros*/
-        if (!isMcr) 
+        if (!is_process_macro) 
         {
             if (strcmp(word, START_DEFINE_MACRO_WORD) == 0) 
             {
 
-                isMcr = true;
-                word = strtok(NULL, " \t\n");
+                is_process_macro = true;
+                word = strtok(NULL, " \r\t\n");
 
 
                 /*checking if macro is safe*/
@@ -61,7 +67,7 @@ bool call_pre_assembler(char *input_file, char *output_file)
                 else 
                 {    
                     /*if macro is not safe print ERROR*/ 
-                    printf("ERROR: \"%s\" in %d line is reserved word, cannot be macro name.\n",word, cline);
+                    print_error_with_arg(current_line, "Reserved word", word, "and can not be a macro name.");
                     is_complete_successfully = false;
                     macro_lines = (char **) malloc(sizeof(char *) * MAX_LENGTH_LINE);
                     macro_lines[num_lines] = (char *) malloc(strlen(word) + 1);
@@ -71,17 +77,17 @@ bool call_pre_assembler(char *input_file, char *output_file)
 
             else 
             {
-                curr_macro = get_macro_if_equals(&macros_list, word);
-                if (curr_macro != NULL) 
+                current_macro_to_process = get_macro_if_equals(&macro_table, word);
+                if (current_macro_to_process != NULL) 
                 {
-                    for (i = 0; i < curr_macro->num_lines; i++) 
+                    for (i = 0; i < current_macro_to_process->num_lines; i++) 
                     {
-                        fprintf(dst_file, "%s", curr_macro->lines[i]);
+                        fprintf(destination_file, "%s", current_macro_to_process->lines[i]);
                     }
                 } 
                 else 
                 {
-                    fprintf(dst_file, "%s", line); /* Keep the line in the output file */
+                    fprintf(destination_file, "%s", line); /* Keep the line in the output file */
                 }
             }
         } 
@@ -89,13 +95,13 @@ bool call_pre_assembler(char *input_file, char *output_file)
         {
             if (strcmp(word, END_DEFINE_MACRO_WORD) == 0) 
             {
-                add_macro(&macros_list, macro_lines[0], macro_lines + 1, num_lines - 1);
+                add_macro(&macro_table, macro_lines[0], macro_lines + 1, num_lines - 1);
                 for (j = 0; j < num_lines; j++)
                     free(macro_lines[j]);
                 free(macro_lines);
                 macro_lines = NULL;
                 num_lines = 0;
-                isMcr = false;
+                is_process_macro = false;
             } 
 
             else 
@@ -104,12 +110,11 @@ bool call_pre_assembler(char *input_file, char *output_file)
                 strcpy(macro_lines[num_lines++], line);
             }
         }
-
     }
 
     /*closing files*/
-    fclose(src_file);
-    fclose(dst_file);
-    free_macro_table(&macros_list);
+    fclose(source_file);
+    fclose(destination_file);
+    free_macro_table(&macro_table);
     return is_complete_successfully;
 }

@@ -6,6 +6,8 @@
         "manager.h": "c",
         "encoding_service.h": "c",
         "encoding_data.h": "c",
-        "technical_functions.h": "c"
+        "technical_functions.h": "c",
+        "macro_repo.h": "c",
+        "symbol_repo.h": "c"
     }
 }

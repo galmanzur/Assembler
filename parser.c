@@ -75,7 +75,11 @@ directive_type get_directive_in_line(char *directive_str)
  It takes a string as a parameter and returns true if the string is a command, false otherwise. */
 bool is_command(char *command_str)
 {
-	return (get_opcode(command_str) != -1) || (get_directive_in_line(command_str)  != -1);
+	if ((get_opcode(command_str) != -1) || (get_directive_in_line(command_str)  != -1))
+	{
+		return true;
+	}
+	return false;
 }
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
@@ -180,7 +184,7 @@ bool is_label(char *label_str, int current_line)
 
 /* This function checks if a line is valid based on the format: opcode param1 , param 2
  It takes a string and the current line number as parameters.*/
- bool valid_line_comma_spaces(char* line, int current_line)
+ bool is_legal_commas_in_instruction(char* line, int current_line)
  {
 	 char* ptr = line;
 	 bool comma_flag = false;

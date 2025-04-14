@@ -1,7 +1,9 @@
 #include "symbol_repo.h"
 
-/*----------------------------------------------------------------------------*/
-/* a function to free symbol table after we done using it*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function frees the memory allocated for the symbol table linked list.
+* It takes a pointer to the head of the symbol table as a parameter. */
 void free_symbol_table(symbol *symbol_table)
 {
     symbol *current = symbol_table;
@@ -15,8 +17,10 @@ void free_symbol_table(symbol *symbol_table)
     }
 }
 
-/*----------------------------------------------------------------------------*/
-/*function to create a symbol with all its data before filling*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function creates a new symbol node for the symbol table.
+* It takes the name and address of the symbol as parameters and returns a pointer to the newly created symbol node. */
 symbol* create_symbol(char* name, int address) 
 {
     symbol* new_symbol = (symbol*) malloc(sizeof(symbol));
@@ -29,8 +33,11 @@ symbol* create_symbol(char* name, int address)
     return new_symbol;
 }
 
-/*----------------------------------------------------------------------------*/
-/*function to find symbol in symbol table*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+
+/* This function finds a symbol in the symbol table linked list.
+* It takes the head of the symbol table and the name of the symbol as parameters and returns a pointer to the found symbol node. */
 symbol* find_symbol(symbol *symbol_table, char *name) 
 {
     symbol *current = symbol_table;
@@ -48,8 +55,11 @@ symbol* find_symbol(symbol *symbol_table, char *name)
     return NULL;
 }
 
-/*----------------------------------------------------------------------------*/
-/*function to add symbol to symbol table linked list*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function adds a new symbol to the symbol table linked list.
+* It takes a pointer to the head of the symbol table, the name of the symbol, and its address as parameters.
+* It returns a pointer to the newly added symbol node. */
 symbol* add_symbol(symbol **symbol_table, char *name, int address)
 {
     symbol *new_symbol = create_symbol(name, address);
@@ -64,9 +74,10 @@ symbol* add_symbol(symbol **symbol_table, char *name, int address)
     return new_symbol;
 }
 
-/*----------------------------------------------------------------------------*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
-/*function to update data symbols because DC and IC are not counted simulatinsely*/
+/* This function synchronizes the instruction counter (IC) of data symbols in the symbol table.
+* It takes a pointer to the symbol table and the current IC as parameters. */
 void sync_IC_of_data_symbol(symbol* symbol_table, int IC)
 {
     symbol* current = symbol_table;
@@ -80,9 +91,11 @@ void sync_IC_of_data_symbol(symbol* symbol_table, int IC)
     }
 }
 
- /*----------------------------------------------------------------------------*/
-/*function to check if label appears twice in the symbol table which is not a valid*/
-bool is_there_duplicate_symbol(symbol* head) 
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if there are duplicate symbols in the symbol table.
+* It takes a pointer to the head of the symbol table as a parameter and returns true if there are duplicate symbols, false otherwise. */
+bool is_there_duplicate_symbol(symbol* head, int current_line) 
 {
     symbol* curr = head;
 
@@ -90,8 +103,9 @@ bool is_there_duplicate_symbol(symbol* head)
         symbol* temp = curr->next;
         while (temp != NULL) 
         {
-            if (strcmp(curr->name, temp->name) == 0) {
-                printf("Error: Duplicate label '%s'\n", curr->name);
+            if (strcmp(curr->name, temp->name) == 0) 
+            {
+                print_error_with_arg(current_line, "Duplicate label", curr->name, "is defined." );
                 return true;
             }
             temp = temp->next;

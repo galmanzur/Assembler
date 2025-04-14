@@ -65,7 +65,7 @@ void create_entry_file(symbol* head, char* filename)
         {
             if(!file)
                 file = fopen(entry_name, "w");
-            fprintf(file, "%s\t%d\n", head->name, head->address);
+            fprintf(file, "%s %d\n", head->name, head->address);
         }
         head = head->next;
     }
@@ -88,7 +88,7 @@ void create_extern_file(externList* head, char* filename)
         {
             if(!file)
                 file = fopen(extern_name, "w");
-            fprintf(file, "%s\t%d\n", head->name, head->address);
+            fprintf(file, "%s %d\n", head->name, head->address);
         }
         head = head->next;
     }
@@ -107,13 +107,13 @@ void create_object_file(char* filename, codeimage* current, int DC, int IC, int 
     /* Open the object file for writing */
     FILE* object_file = fopen(object_name, "w"); 
 
-    /* Display count of instructions and data in the object file */
+    /* Display IC , DC in the object file */
     fprintf(object_file, "\t%d %d\n", IC - START_VALUE_OF_IC, DC);
 
-    /* Write the code image to the object file */
+    /* Write the code image in the object file */
     write_code_image_to_file_in_hexa(current, object_file);
 
-    /* Write the data image to the object file */
+    /* Write the data image in the object file */
     write_data_image_to_file_in_hexa(data_image, DC, IC, object_file);
 
     /* Close the object file */

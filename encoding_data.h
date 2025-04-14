@@ -26,7 +26,7 @@
 
 #define START_VALUE_OF_DC 0 /* The starting value of the data counter (DC) in the assembler. */
 
-#define DATA_IMAGE_SIZE 2048
+#define DATA_IMAGE_SIZE 3000
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 

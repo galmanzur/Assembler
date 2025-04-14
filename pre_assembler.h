@@ -1,8 +1,8 @@
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->
                                              Pre Assembler Stage 1️⃣✔️
- * This stage is responsible for the pre-assembly process of the assembler.
-    * It processes the assembly code, expands macros, and generates the pre-assembly output.
-    * The stage includes functions for handling macros, validating syntax, and managing the pre-assembler process.
+ This stage is responsible for the pre-assembly process of the assembler.
+ It processes the assembly code, expands macros, and generates the pre-assembly output.
+ The stage includes functions for handling macros, validating syntax, and managing the pre-assembler process.
  ->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
 #ifndef PRE_ASSEMBLER_H
@@ -21,6 +21,7 @@
 
 /*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
+/* Define syntax in order the instructions of assembler */
 #define START_DEFINE_MACRO_WORD "mcro" 
 #define END_DEFINE_MACRO_WORD "mcroend" 
 

@@ -1,33 +1,54 @@
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->
+                                           Symbol Repository 📚
+This file header contains the function declarations for managing the symbol table.
+It includes functions to create, find, add, and free symbols in the symbol table.
+It also includes functions to synchronize the instruction counter (IC) of data symbols and check for duplicate symbols.                                           								                                       
+->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 #ifndef SYMBOL_REPO_H
 #define SYMBOL_REPO_H
+
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
 #include "symbol_defenition.h"
 #include "print_to_console_service.h"
 
-/*----------------------------------------------------------------------------*/
-/*function to free symbol table after we are done using it in the run*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function frees the memory allocated for the symbol table linked list.
+* It takes a pointer to the head of the symbol table as a parameter. */
 void free_symbol_table(symbol *symbol_table);
 
-/*----------------------------------------------------------------------------*/
-/*function to create a symbol with all its data*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function creates a new symbol node for the symbol table.
+* It takes the name and address of the symbol as parameters and returns a pointer to the newly created symbol node. */
 symbol* create_symbol(char* name, int address);
 
-/*----------------------------------------------------------------------------*/
-/*function to find symbol in table*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function finds a symbol in the symbol table linked list.
+* It takes the head of the symbol table and the name of the symbol as parameters and returns a pointer to the found symbol node. */
 symbol* find_symbol(symbol *symbol_table, char *name);
 
-/*----------------------------------------------------------------------------*/
-/*function to add synbol to synbol table linked list*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function adds a new symbol to the symbol table linked list.
+ It takes a pointer to the head of the symbol table, the name of the symbol, and its address as parameters.
+* It returns a pointer to the newly added symbol node. */
 symbol* add_symbol(symbol **symbol_table, char *name, int address); 
 
-/*----------------------------------------------------------------------------*/
-/*function to update symbol of data lables in the symbol table becuase IC and DC
-does not increments simultanisaly but should be printed together*/
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function synchronizes the instruction counter (IC) of data symbols in the symbol table.
+ *It takes a pointer to the symbol table and the current IC as parameters. */
 void sync_IC_of_data_symbol(symbol* symbol_table, int IC);
 
-/*----------------------------------------------------------------------------*/
-/*function to itterate through symbol tbale linked list and check if lable has been 
-defined twice for error handling after first pass*/
-bool is_there_duplicate_symbol(symbol* head);
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
+
+/* This function checks if there are duplicate symbols in the symbol table.
+* It takes a pointer to the head of the symbol table as a parameter and returns true if there are duplicate symbols, false otherwise. */
+bool is_there_duplicate_symbol(symbol* head, int current_line);
+
+/*->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->*/
 
 #endif /* SYMBOL_REPO_H */
